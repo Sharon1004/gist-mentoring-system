@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - GIST Mentoring System</title>
+    <link rel="icon" type="image/svg+xml" href="assets/gist-logo.svg">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar py-6">
+        <div class="container mx-auto px-6 flex items-center justify-between">
+            <div class="text-xl font-semibold flex items-center gap-3 navbar-brand">
+                <img src="assets/gist-logo.svg" alt="GIST Nellore" class="brand-logo">
+                <span>GIST Mentoring System</span>
+            </div>
+            <div class="hidden md:flex items-center gap-4">
+                <a href="student-progress.html" class="font-medium">Progress</a>
+                <a href="#" onclick="Auth.logout(); return false;" class="font-medium">Logout</a>
+            </div>
+            <div class="mobile-only-nav">
+                <a href="student-progress.html">Progress</a>
+                <a href="#" onclick="Auth.logout(); return false;">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Student tabs for quick navigation -->
+    <div class="container mx-auto px-6 max-w-7xl">
+        <div class="tab-nav">
+            <a href="student-dashboard.html" class="tab-link active">Dashboard</a>
+            <a href="student-progress.html" class="tab-link">Progress</a>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-6 py-12 max-w-7xl">
+        <!-- Quick jump -->
+        <nav class="navbar quick-jump mb-6 flex flex-wrap gap-2 p-3 bg-gray-100 rounded-xl">
+            <span class="text-sm font-semibold text-gray-600 mr-2 self-center">Quick jump:</span>
+            <a href="#section-profile" class="quick-jump-link">Profile</a>
+            <a href="#section-performance" class="quick-jump-link">Performance</a>
+            <a href="#section-feedback" class="quick-jump-link">Feedback</a>
+            <a href="#section-records" class="quick-jump-link">Academic Records</a>
+            <a href="#section-courses" class="quick-jump-link">Courses</a>
+            <a href="#section-goals" class="quick-jump-link">Goals</a>
+            <a href="#section-career" class="quick-jump-link">Career</a>
+        </nav>
+
+        <!-- Profile Header -->
+        <div id="section-profile" class="bg-white p-8 rounded-2xl mb-8 card scroll-mt-6">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                <div class="flex items-center gap-6">
+                    <div class="w-20 h-20 bg-blue-50 rounded-xl flex items-center justify-center">
+                        <span class="text-4xl">👨‍🎓</span>
+                    </div>
+                    <div>
+                        <h1 class="h1 mb-2" id="profileName">Student</h1>
+                        <div class="flex flex-wrap gap-3 text-base opacity-95">
+                            <span id="profileRollNo">-</span>
+                            <span>•</span>
+                            <span id="profileDepartment">-</span>
+                            <span>•</span>
+                            <span id="profileYear">-</span>
+                            <span>•</span>
+                            <span id="profileMentor">Mentor: Unassigned</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold mb-2" id="profileCgpa">CGPA: -</div>
+                    <div class="text-sm opacity-90" id="profileCompletion">Profile data loaded from account</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Academic Performance Chart -->
+        <div id="section-performance" class="card p-6 mb-8 scroll-mt-6">
+            <div class="card-header">
+                <span class="text-2xl">📈</span>
+                <h2 class="h3 text-gist-navy">Academic Performance Overview</h2>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Semester Graph -->
+                <div>
+                    <h3 class="font-semibold text-lg mb-4">SGPA Trend</h3>
+                    <div class="chart-container" style="height: 250px;">
+                        <canvas id="sgpaChart"></canvas>
+                    </div>
+                </div>
+                <!-- Marks Summary -->
+                <div>
+                    <h3 class="font-semibold text-lg mb-4">Semester Summary</h3>
+                    <div class="grid grid-cols-1 gap-3">
+                        <div class="p-4 bg-gray-50 rounded-lg text-center">
+                            <div class="font-bold text-2xl text-primary" id="summarySgpa1">-</div>
+                            <div class="text-sm text-gray-600 mt-1" id="summarySgpaLabel1">Semester -</div>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-lg text-center">
+                            <div class="font-bold text-2xl text-primary" id="summarySgpa2">-</div>
+                            <div class="text-sm text-gray-600 mt-1" id="summarySgpaLabel2">Semester -</div>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-lg text-center">
+                            <div class="font-bold text-2xl text-primary" id="summarySgpa3">-</div>
+                            <div class="text-sm text-gray-600 mt-1" id="summarySgpaLabel3">Semester -</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mentor Feedback & Timeline Section -->
+        <div id="section-feedback" class="card p-6 mb-8 scroll-mt-6">
+            <div class="card-header">
+                <span class="text-2xl">👨‍🏫</span>
+                <h2 class="h3 text-gist-navy">Mentor Feedback & Guidance</h2>
+            </div>
+            
+            <!-- Multi-dimensional Feedback Tabs -->
+            <div class="dashboard-feedback-tabs">
+                <button onclick="switchFeedbackTab('general')" id="tab-general" class="px-4 py-2 font-medium border-b-2 border-primary text-primary">
+                    General Feedback
+                </button>
+                <button onclick="switchFeedbackTab('academic')" id="tab-academic" class="px-4 py-2 font-medium border-b-2 border-transparent text-gray-600 hover:text-primary">
+                    Academic Progress
+                </button>
+                <button onclick="switchFeedbackTab('courses')" id="tab-courses" class="px-4 py-2 font-medium border-b-2 border-transparent text-gray-600 hover:text-primary">
+                    Courses & Training
+                </button>
+                <button onclick="switchFeedbackTab('career')" id="tab-career" class="px-4 py-2 font-medium border-b-2 border-transparent text-gray-600 hover:text-primary">
+                    Career Guidance
+                </button>
+            </div>
+
+            <!-- Feedback Timeline Container -->
+            <div id="feedbackTimeline" class="space-y-4">
+                <!-- Dynamically loaded feedback entries with timeline -->
+            </div>
+        </div>
+
+        <div id="section-records" class="card p-6 mb-8 scroll-mt-6">
+            <div class="card-header">
+                <span class="text-2xl">📚</span>
+                <h2 class="h3 text-gist-navy">Subject-wise Academic Records</h2>
+            </div>
+            <div id="semesterFilterBar" class="flex flex-wrap gap-2 mt-4 mb-4">
+                <!-- Semester filter buttons are rendered dynamically -->
+            </div>
+            <div class="chart-container mb-6" style="height: 240px;">
+                <canvas id="semesterGradeChart"></canvas>
+            </div>
+            
+            <div id="academicRecords" class="space-y-6">
+                <!-- Records will be dynamically loaded here -->
+            </div>
+        </div>
+
+        <!-- ML-based Course Recommendations -->
+        <div id="section-courses" class="card p-6 mb-8 scroll-mt-6">
+            <div class="card-header flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">🎓</span>
+                    <div>
+                        <h2 class="h3 text-gist-navy">Recommended Courses for You</h2>
+                        <p class="text-sm text-gray-500 mt-1">Personalized from your CGPA, interests, career goal & academic performance</p>
+                    </div>
+                </div>
+            </div>
+            <div id="courseRecommendations" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Loaded by ML recommendation API -->
+            </div>
+            <div id="courseRecommendationsEmpty" class="hidden text-center py-8 text-gray-500">
+                No recommendations available. Complete your profile and academic records for better suggestions.
+            </div>
+        </div>
+
+        <div id="section-goals" class="card p-6 mb-8 scroll-mt-6">
+            <div class="card-header">
+                <span class="text-2xl">🎯</span>
+                <h2 class="h3 text-gist-navy">Goals Assigned by Mentor</h2>
+            </div>
+            <div id="goalsContainer" class="space-y-4"></div>
+        </div>
+
+        <!-- Career Guidance & Recommendations -->
+        <div id="section-career" class="card p-6 mb-8 scroll-mt-6">
+            <div class="card-header">
+                <span class="text-2xl">🎯</span>
+                <h2 class="h3 text-gist-navy">Personalized Career Guidance</h2>
+            </div>
+
+            <!-- Mentor's Career Suggestions -->
+            <div id="mentorSuggestionsSection" class="mb-6" style="display: none;">
+                <div class="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-lg border-2 border-green-200">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-3xl">👨‍🏫</span>
+                        <div>
+                            <h3 class="font-bold text-lg text-green-800">Career Suggestions from Your Mentor</h3>
+                            <p class="text-sm text-green-700">Expert recommendations tailored for you</p>
+                        </div>
+                    </div>
+                    <div id="mentorSuggestionsList" class="space-y-4">
+                        <!-- Will be populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Your Interests & Goals -->
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg mb-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-semibold text-lg text-navy">Your Profile & Interests</h3>
+                    <button onclick="toggleEditCareerProfile()" id="editCareerBtn" class="btn-secondary text-sm">
+                        ✏️ Edit Profile
+                    </button>
+                </div>
+
+                <!-- View Mode -->
+                <div id="careerViewMode" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <div class="text-sm text-gray-600 mb-2">Career Goal</div>
+                        <div class="font-semibold text-primary" id="careerGoalDisplay">Software Developer</div>
+                    </div>
+                    <div>
+                        <div class="text-sm text-gray-600 mb-2">Current CGPA</div>
+                        <div class="font-semibold text-primary" id="profileCGPA">8.34</div>
+                    </div>
+                    <div class="md:col-span-2">
+                        <div class="text-sm text-gray-600 mb-2">Areas of Interest</div>
+                        <div id="interestTagsDisplay" class="flex flex-wrap gap-2">
+                            <!-- Will be populated dynamically -->
+                        </div>
+                    </div>
+                    <div class="md:col-span-2">
+                        <div class="text-sm text-gray-600 mb-2">Aspirations & Goals</div>
+                        <div id="aspirationsDisplay" class="text-sm text-gray-800 bg-white/70 border border-blue-100 rounded-lg p-3">Not set</div>
+                    </div>
+                    <div class="md:col-span-2">
+                        <div class="text-sm text-gray-600 mb-2">SWOT</div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div class="bg-white/70 border border-green-100 rounded-lg p-3">
+                                <div class="text-xs font-semibold text-green-700 mb-1">Strengths</div>
+                                <div id="swotStrengthsDisplay" class="text-sm text-gray-800">Not set</div>
+                            </div>
+                            <div class="bg-white/70 border border-red-100 rounded-lg p-3">
+                                <div class="text-xs font-semibold text-red-700 mb-1">Weaknesses</div>
+                                <div id="swotWeaknessesDisplay" class="text-sm text-gray-800">Not set</div>
+                            </div>
+                            <div class="bg-white/70 border border-amber-100 rounded-lg p-3">
+                                <div class="text-xs font-semibold text-amber-700 mb-1">Opportunities</div>
+                                <div id="swotOpportunitiesDisplay" class="text-sm text-gray-800">Not set</div>
+                            </div>
+                            <div class="bg-white/70 border border-indigo-100 rounded-lg p-3">
+                                <div class="text-xs font-semibold text-indigo-700 mb-1">Threats</div>
+                                <div id="swotThreatsDisplay" class="text-sm text-gray-800">Not set</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Edit Mode -->
+                <form id="careerEditMode" class="space-y-4" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">Career Goal</label>
+                        <input type="text" id="careerGoalInput" class="form-input" placeholder="e.g., Software Developer, Data Scientist">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Areas of Interest & Skills</label>
+                        <select id="interestsSelect" class="form-input" multiple size="8">
+                            <!-- Software / Programming -->
+                            <option value="Web Development">Web Development</option>
+                            <option value="Frontend Development">Frontend Development (HTML/CSS/JS)</option>
+                            <option value="Backend Development">Backend Development (APIs & Services)</option>
+                            <option value="Full Stack Development">Full Stack Development</option>
+                            <option value="Java Programming">Java Programming</option>
+                            <option value="Python Programming">Python Programming</option>
+                            <option value="C/C++ Programming">C / C++ Programming</option>
+                            <option value="Data Structures & Algorithms">Data Structures & Algorithms</option>
+                            <option value="Competitive Programming">Competitive Programming</option>
+                            <option value="Mobile App Development (Android)">Mobile App Development (Android)</option>
+                            <option value="Mobile App Development (iOS)">Mobile App Development (iOS)</option>
+                            <option value="React Native">React Native</option>
+                            <option value="Flutter">Flutter</option>
+
+                            <!-- Data / AI / ML -->
+                            <option value="Data Science">Data Science</option>
+                            <option value="Data Analytics">Data Analytics</option>
+                            <option value="Machine Learning">Machine Learning</option>
+                            <option value="Deep Learning">Deep Learning</option>
+                            <option value="Artificial Intelligence">Artificial Intelligence</option>
+                            <option value="Computer Vision">Computer Vision</option>
+                            <option value="Natural Language Processing">Natural Language Processing</option>
+
+                            <!-- Cloud / DevOps / Security -->
+                            <option value="Cloud Computing (AWS)">Cloud Computing (AWS)</option>
+                            <option value="Cloud Computing (Azure)">Cloud Computing (Azure)</option>
+                            <option value="Cloud Computing (GCP)">Cloud Computing (GCP)</option>
+                            <option value="DevOps">DevOps (CI/CD, Docker, Kubernetes)</option>
+                            <option value="Cybersecurity">Cybersecurity</option>
+                            <option value="Ethical Hacking">Ethical Hacking</option>
+                            <option value="Networking">Computer Networking</option>
+
+                            <!-- Databases / Big Data -->
+                            <option value="Database Management (SQL)">Database Management (SQL)</option>
+                            <option value="NoSQL Databases">NoSQL Databases</option>
+                            <option value="Big Data (Hadoop/Spark)">Big Data (Hadoop / Spark)</option>
+
+                            <!-- Emerging Tech / Product -->
+                            <option value="Blockchain">Blockchain</option>
+                            <option value="Internet of Things (IoT)">Internet of Things (IoT)</option>
+                            <option value="Embedded Systems">Embedded Systems</option>
+                            <option value="VLSI Design">VLSI Design</option>
+                            <option value="Robotics">Robotics</option>
+                            <option value="AR/VR Development">AR / VR Development</option>
+                            <option value="Game Development">Game Development</option>
+                            <option value="UI/UX Design">UI / UX Design</option>
+                            <option value="Software Testing & QA">Software Testing & QA</option>
+                            <option value="Automation Testing (Selenium)">Automation Testing (Selenium)</option>
+                            <option value="Product Management">Product Management</option>
+                            <option value="Business Analysis">Business Analysis</option>
+
+                            <!-- Core Engineering - EEE / MECH / CIVIL / ECE -->
+                            <option value="Power Systems">Power Systems</option>
+                            <option value="Control Systems">Control Systems</option>
+                            <option value="Renewable Energy">Renewable Energy</option>
+                            <option value="Electrical Machines">Electrical Machines</option>
+                            <option value="Thermal Engineering">Thermal Engineering</option>
+                            <option value="Manufacturing Processes">Manufacturing Processes</option>
+                            <option value="CAD/CAM Design">CAD / CAM Design</option>
+                            <option value="Mechanical Design (CAD)">Mechanical Design (CAD)</option>
+                            <option value="Structural Engineering">Structural Engineering</option>
+                            <option value="Transportation Engineering">Transportation Engineering</option>
+                            <option value="Geotechnical Engineering">Geotechnical Engineering</option>
+                            <option value="Environmental Engineering">Environmental Engineering</option>
+                            <option value="Surveying & GIS">Surveying & GIS</option>
+                        </select>
+                        <div class="text-xs text-gray-500 mt-1">
+                            Hold Ctrl (Windows) or Cmd (Mac) to select multiple interests and skills.
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Aspirations & Goals</label>
+                        <textarea id="aspirationsInput" class="form-input" rows="3" placeholder="Example: Become an AI Engineer and secure a product-based internship in 6 months"></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label class="form-label">SWOT - Strengths</label>
+                            <textarea id="swotStrengthsInput" class="form-input" rows="3" placeholder="One point per line"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">SWOT - Weaknesses</label>
+                            <textarea id="swotWeaknessesInput" class="form-input" rows="3" placeholder="One point per line"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">SWOT - Opportunities</label>
+                            <textarea id="swotOpportunitiesInput" class="form-input" rows="3" placeholder="One point per line"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">SWOT - Threats</label>
+                            <textarea id="swotThreatsInput" class="form-input" rows="3" placeholder="One point per line"></textarea>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <button type="button" onclick="saveCareerProfile()" class="btn">
+                            💾 Save Changes
+                        </button>
+                        <button type="button" onclick="cancelEditCareerProfile()" class="btn-secondary">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- AI Career Recommendations -->
+            <div class="ai-career-section">
+                <div class="ai-career-section__header">
+                    <div class="ai-career-section__badge">🤖 AI-Powered</div>
+                    <div class="ai-career-section__title-wrap">
+                        <h3 class="ai-career-section__title">AI Career Recommendations</h3>
+                        <p class="ai-career-section__subtitle">Personalized advice based on your selected skills, CGPA, aspirations/goals, SWOT, and academic performance.</p>
+                    </div>
+                    <button type="button" id="aiRecommendBtn" onclick="loadAICareerRecommendations()" class="ai-career-section__btn">
+                        <span class="ai-career-section__btn-icon">✨</span>
+                        Get AI Recommendations
+                    </button>
+                </div>
+                <div id="aiRecommendStatus" class="ai-career-section__status" style="display: none;"></div>
+                <div id="aiRecommendContent" class="ai-career-section__content" style="display: none;"></div>
+                <div id="aiRecommendError" class="ai-career-section__error" style="display: none;"></div>
+            </div>
+
+            <!-- Recommended Career Paths -->
+            <div class="mb-6">
+                <h3 class="font-semibold text-lg text-navy mb-4 flex items-center gap-2">
+                    <span>💼</span> Recommended Career Paths for You
+                </h3>
+                <div id="careerPaths" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Will be populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Skills Roadmap -->
+            <div class="mb-6">
+                <h3 class="font-semibold text-lg text-navy mb-4 flex items-center gap-2">
+                    <span>🛣️</span> Skills Roadmap
+                </h3>
+                <div id="skillsRoadmap" class="space-y-4">
+                    <!-- Will be populated dynamically -->
+                </div>
+            </div>
+
+            <!-- Learning Resources -->
+            <div>
+                <h3 class="font-semibold text-lg text-navy mb-4 flex items-center gap-2">
+                    <span>📚</span> Recommended Learning Resources
+                </h3>
+                <div id="learningResources" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Will be populated dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check authentication
+        if (!Auth.requireAuth('student')) {
+            // Will redirect if not authenticated
+        } else {
+            initStudentDashboard();
+        }
+
+        let allAcademicRecords = [];
+        let selectedSemester = 'all';
+
+        async function initStudentDashboard() {
+            try {
+                const user = await Auth.refreshMe();
+                const progress = await Auth.getStudentProgress();
+                updateProfileHeader(user, progress);
+
+                allAcademicRecords = progress.academicRecords || [];
+                renderSemesterButtons(allAcademicRecords);
+                renderAcademicRecords(allAcademicRecords, selectedSemester);
+                renderSemesterGradeChart(allAcademicRecords, selectedSemester);
+                renderPerformanceSummary(progress.academicRecords || []);
+                renderSGPAChart(progress.academicRecords || []);
+
+                // Load career guidance
+                loadCareerGuidance({ ...user, cgpa: progress.cgpa ?? user.cgpa });
+
+                // Load mentor's career suggestions (still localStorage based)
+                loadMentorSuggestions(user);
+
+                // Load mentor feedback timeline (live API; not DB persisted)
+                await loadMentorFeedback('general');
+                loadGoals(user);
+
+                // ML-based course recommendations
+                const recommendations = await Auth.getCourseRecommendations(9);
+                renderCourseRecommendations(recommendations);
+            } catch (e) {
+                Notification.show(e.message || 'Failed to load dashboard', 'error');
+            }
+        }
+
+        function updateProfileHeader(user, progress) {
+            document.getElementById('profileName').textContent = user.name || 'Student';
+            document.getElementById('profileRollNo').textContent = user.rollNo || '-';
+            document.getElementById('profileDepartment').textContent = user.department || '-';
+            document.getElementById('profileYear').textContent = user.year || '-';
+            document.getElementById('profileMentor').textContent = `Mentor: ${user.mentor || 'Unassigned'}`;
+            document.getElementById('profileCgpa').textContent = `CGPA: ${progress.cgpa ?? user.cgpa ?? '-'}`;
+        }
+
+        function renderPerformanceSummary(records) {
+            const ordered = [...records].sort((a, b) => Number(a.semester) - Number(b.semester));
+            const recent = ordered.slice(-3);
+            const ids = ['1', '2', '3'];
+            ids.forEach((id, idx) => {
+                const item = recent[idx];
+                document.getElementById(`summarySgpa${id}`).textContent = item ? item.sgpa : '-';
+                document.getElementById(`summarySgpaLabel${id}`).textContent = item ? `Semester ${item.semester}` : 'Semester -';
+            });
+        }
+
+        function loadGoals(user) {
+            const container = document.getElementById('goalsContainer');
+            const goals = DataStore.getGoals().filter(g => g.studentRoll === user.rollNo);
+            if (!goals.length) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
+                        <div class="text-4xl mb-3">🎯</div>
+                        <p>No goals assigned yet.</p>
+                    </div>
+                `;
+                return;
+            }
+            container.innerHTML = goals.map((goal) => `
+                <div class="p-4 rounded-lg bg-gray-50 feedback-card">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <div class="font-semibold text-base mb-1">${goal.goal}</div>
+                            <div class="text-xs text-gray-600">${goal.type || 'General'}</div>
+                        </div>
+                        <span class="status-badge ${goal.status === 'Completed' ? 'status-completed' : goal.status === 'In Progress' ? 'status-progress' : 'status-pending'}">${goal.status || 'Pending'}</span>
+                    </div>
+                    <div class="text-xs text-gray-600 mt-3">
+                        ${goal.deadline ? `Deadline: ${new Date(goal.deadline).toLocaleDateString('en-IN')}` : 'No deadline set'}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderCourseRecommendations(recommendations) {
+            const container = document.getElementById('courseRecommendations');
+            const emptyEl = document.getElementById('courseRecommendationsEmpty');
+            if (!container) return;
+            if (!recommendations || recommendations.length === 0) {
+                container.classList.add('hidden');
+                if (emptyEl) { emptyEl.classList.remove('hidden'); }
+                return;
+            }
+            if (emptyEl) emptyEl.classList.add('hidden');
+            container.classList.remove('hidden');
+            const difficultyLabel = (d) => (d <= 1 ? 'Beginner' : d <= 2 ? 'Easy' : d <= 3 ? 'Intermediate' : d <= 4 ? 'Advanced' : 'Expert');
+            container.innerHTML = recommendations.map((rec) => `
+                <div class="border border-gray-200 rounded-xl p-4 hover:border-primary hover:shadow-md transition-all bg-white">
+                    <div class="flex items-start justify-between mb-2">
+                        <span class="text-xs font-medium px-2 py-1 rounded-full ${rec.difficulty <= 2 ? 'bg-green-100 text-green-700' : rec.difficulty <= 3 ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}">${difficultyLabel(rec.difficulty)}</span>
+                        <span class="text-xs font-semibold text-primary">${Math.round(rec.score * 100)}% match</span>
+                    </div>
+                    <h3 class="font-semibold text-navy mb-1">${rec.name}</h3>
+                    <p class="text-xs text-gray-500 mb-2">${rec.category}</p>
+                    <p class="text-sm text-gray-600 mb-3 line-clamp-2">${rec.description || '—'}</p>
+                    <ul class="text-xs text-gray-600 space-y-1">
+                        ${(rec.reasons || []).map(r => `<li class="flex items-center gap-1">✓ ${r}</li>`).join('')}
+                    </ul>
+                </div>
+            `).join('');
+        }
+
+        function loadMentorSuggestions(user) {
+            const suggestions = DataStore.getMyCareerSuggestions(user.rollNo);
+            
+            if (suggestions && suggestions.length > 0) {
+                document.getElementById('mentorSuggestionsSection').style.display = 'block';
+                const container = document.getElementById('mentorSuggestionsList');
+                
+                container.innerHTML = suggestions.slice().reverse().map((suggestion, index) => `
+                    <div class="bg-white p-5 rounded-lg shadow-sm border-l-4 ${
+                        suggestion.priority === 'highly-recommended' ? 'border-green-500' : 
+                        suggestion.priority === 'recommended' ? 'border-blue-500' : 
+                        'border-yellow-500'
+                    }">
+                        <div class="flex items-start justify-between mb-3">
+                            <div>
+                                <h4 class="font-bold text-lg text-navy">${suggestion.careerPath}</h4>
+                                <div class="text-xs text-gray-500 mt-1">
+                                    Suggested by ${suggestion.mentorName} on ${new Date(suggestion.date).toLocaleDateString('en-IN')}
+                                </div>
+                            </div>
+                            <span class="status-badge ${
+                                suggestion.priority === 'highly-recommended' ? 'status-completed' : 
+                                suggestion.priority === 'recommended' ? 'status-progress' : 
+                                'status-pending'
+                            }">
+                                ${suggestion.priority === 'highly-recommended' ? '⭐ Top Pick' : 
+                                  suggestion.priority === 'recommended' ? '👍 Recommended' : 
+                                  '💡 Consider'}
+                            </span>
+                        </div>
+                        <div class="mb-3">
+                            <div class="text-sm font-semibold text-gray-700 mb-1">Why this path?</div>
+                            <p class="text-sm text-gray-600 italic">"${suggestion.reason}"</p>
+                        </div>
+                        ${suggestion.skills ? `
+                            <div class="mb-3">
+                                <div class="text-sm font-semibold text-gray-700 mb-2">Skills to develop:</div>
+                                <div class="flex flex-wrap gap-2">
+                                    ${suggestion.skills.split(',').map(skill => 
+                                        `<span class="text-xs px-3 py-1 bg-green-50 text-green-700 rounded-full font-medium">✓ ${skill.trim()}</span>`
+                                    ).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        ${suggestion.resources ? `
+                            <div class="bg-gray-50 p-3 rounded">
+                                <div class="text-sm font-semibold text-gray-700 mb-1">📚 Recommended resources:</div>
+                                <p class="text-sm text-gray-600">${suggestion.resources}</p>
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+            }
+        }
+
+        async function loadAICareerRecommendations() {
+            const btn = document.getElementById('aiRecommendBtn');
+            const statusEl = document.getElementById('aiRecommendStatus');
+            const contentEl = document.getElementById('aiRecommendContent');
+            const errorEl = document.getElementById('aiRecommendError');
+            if (!btn || !statusEl || !contentEl || !errorEl) return;
+
+            contentEl.style.display = 'none';
+            errorEl.style.display = 'none';
+            statusEl.style.display = 'block';
+            statusEl.textContent = 'Getting personalized recommendations...';
+            btn.disabled = true;
+
+            try {
+                const recommendation = await Auth.getAICareerRecommendations();
+                statusEl.style.display = 'none';
+                if (recommendation) {
+                    contentEl.innerHTML = renderAIRecommendation(recommendation);
+                    contentEl.style.display = 'block';
+                } else {
+                    errorEl.textContent = 'No recommendation returned. Try again.';
+                    errorEl.style.display = 'block';
+                }
+            } catch (e) {
+                statusEl.style.display = 'none';
+                errorEl.textContent = e.message || 'Failed to load AI recommendations.';
+                errorEl.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function renderAIRecommendation(rec) {
+            const summary = rec.summary || '';
+            const suggestions = Array.isArray(rec.careerSuggestions) ? rec.careerSuggestions : [];
+            const roadmap = Array.isArray(rec.roadmap) ? rec.roadmap : [];
+            const warnings = Array.isArray(rec.warnings) ? rec.warnings : [];
+
+            const suggestionsHtml = suggestions.length
+                ? `
+                    <div class="mt-4">
+                        <h4 class="font-semibold text-navy mb-2">Career Suggestions</h4>
+                        <div class="space-y-3">
+                            ${suggestions.map((s) => `
+                                <div class="bg-white border border-gray-200 p-4 rounded-lg">
+                                    <div class="font-semibold text-primary">${s.role || 'Suggested Role'}</div>
+                                    <p class="text-sm text-gray-700 mt-1">${s.whyFit || ''}</p>
+                                    ${Array.isArray(s.focusSkills) && s.focusSkills.length ? `
+                                        <div class="text-xs text-gray-700 mt-2"><strong>Focus Skills:</strong> ${s.focusSkills.join(', ')}</div>
+                                    ` : ''}
+                                    ${Array.isArray(s.next90Days) && s.next90Days.length ? `
+                                        <div class="text-xs text-gray-700 mt-2"><strong>Next 90 Days:</strong> ${s.next90Days.join(' | ')}</div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `
+                : '';
+
+            const roadmapHtml = roadmap.length
+                ? `
+                    <div class="mt-4">
+                        <h4 class="font-semibold text-navy mb-2">Roadmap</h4>
+                        <div class="space-y-2">
+                            ${roadmap.map((r) => `
+                                <div class="bg-gray-50 border border-gray-200 p-3 rounded-lg">
+                                    <div class="font-medium text-gray-800">${r.phase || 'Phase'}</div>
+                                    <div class="text-sm text-gray-700 mt-1">${Array.isArray(r.goals) ? r.goals.join(' | ') : ''}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `
+                : '';
+
+            const warningsHtml = warnings.length
+                ? `
+                    <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <div class="font-semibold text-yellow-800 text-sm mb-1">Watchouts</div>
+                        <div class="text-sm text-yellow-700">${warnings.join(' | ')}</div>
+                    </div>
+                `
+                : '';
+
+            return `
+                <div>
+                    <div class="text-sm text-gray-800 whitespace-pre-wrap">${summary}</div>
+                    ${suggestionsHtml}
+                    ${roadmapHtml}
+                    ${warningsHtml}
+                </div>
+            `;
+        }
+
+        function loadCareerGuidance(user) {
+            // Set profile info
+            document.getElementById('careerGoalDisplay').textContent = user.careerGoal || 'Not set';
+            document.getElementById('profileCGPA').textContent = user.cgpa;
+
+            // Display interests
+            const interestsContainer = document.getElementById('interestTagsDisplay');
+            const interests = user.interests || ['Not specified'];
+            interestsContainer.innerHTML = interests.map(interest => 
+                `<span class="status-badge status-progress">${interest}</span>`
+            ).join('');
+
+            const aspirations = (user.aspirations || '').trim();
+            document.getElementById('aspirationsDisplay').textContent = aspirations || 'Not set';
+
+            const swot = user.swot || {};
+            const renderSwotItems = (items) => {
+                if (!Array.isArray(items) || items.length === 0) return 'Not set';
+                return items.join(', ');
+            };
+            document.getElementById('swotStrengthsDisplay').textContent = renderSwotItems(swot.strengths);
+            document.getElementById('swotWeaknessesDisplay').textContent = renderSwotItems(swot.weaknesses);
+            document.getElementById('swotOpportunitiesDisplay').textContent = renderSwotItems(swot.opportunities);
+            document.getElementById('swotThreatsDisplay').textContent = renderSwotItems(swot.threats);
+
+            // Store current values for editing
+            window.currentCareerGoal = user.careerGoal || '';
+            window.currentInterests = user.interests || [];
+            window.currentAspirations = aspirations;
+            window.currentSwot = {
+                strengths: Array.isArray(swot.strengths) ? swot.strengths : [],
+                weaknesses: Array.isArray(swot.weaknesses) ? swot.weaknesses : [],
+                opportunities: Array.isArray(swot.opportunities) ? swot.opportunities : [],
+                threats: Array.isArray(swot.threats) ? swot.threats : []
+            };
+
+            // Generate career recommendations based on department and interests
+            const careerData = getCareerRecommendations(user);
+            renderCareerPaths(careerData.paths);
+            renderSkillsRoadmap(careerData.skills);
+            renderLearningResources(careerData.resources);
+        }
+
+        function getCareerRecommendations(user) {
+            const dept = user.department;
+            const cgpa = user.cgpa;
+            const interests = user.interests || [];
+
+            // Define career paths by department
+            const careerDatabase = {
+                'CSE': {
+                    paths: [
+                        {
+                            title: 'Full Stack Developer',
+                            description: 'Build end-to-end web applications using modern frameworks',
+                            demand: 'High',
+                            avgSalary: '₹6-12 LPA',
+                            skills: ['JavaScript', 'React', 'Node.js', 'Databases'],
+                            match: interests.some(i => i.toLowerCase().includes('web'))
+                        },
+                        {
+                            title: 'Machine Learning Engineer',
+                            description: 'Develop AI/ML models and deploy intelligent systems',
+                            demand: 'Very High',
+                            avgSalary: '₹8-18 LPA',
+                            skills: ['Python', 'TensorFlow', 'Deep Learning', 'Statistics'],
+                            match: interests.some(i => i.toLowerCase().includes('machine') || i.toLowerCase().includes('ai'))
+                        },
+                        {
+                            title: 'Cloud Solutions Architect',
+                            description: 'Design and implement cloud infrastructure solutions',
+                            demand: 'High',
+                            avgSalary: '₹10-20 LPA',
+                            skills: ['AWS/Azure', 'DevOps', 'Networking', 'Security'],
+                            match: interests.some(i => i.toLowerCase().includes('cloud'))
+                        },
+                        {
+                            title: 'Data Scientist',
+                            description: 'Analyze large datasets to derive business insights',
+                            demand: 'Very High',
+                            avgSalary: '₹7-15 LPA',
+                            skills: ['Python', 'SQL', 'Data Visualization', 'ML'],
+                            match: interests.some(i => i.toLowerCase().includes('data'))
+                        },
+                        {
+                            title: 'Mobile App Developer',
+                            description: 'Create native and cross-platform mobile applications',
+                            demand: 'High',
+                            avgSalary: '₹5-10 LPA',
+                            skills: ['React Native', 'Flutter', 'Android/iOS', 'APIs'],
+                            match: interests.some(i => i.toLowerCase().includes('mobile') || i.toLowerCase().includes('app'))
+                        },
+                        {
+                            title: 'Cybersecurity Analyst',
+                            description: 'Protect systems and networks from security threats',
+                            demand: 'High',
+                            avgSalary: '₹6-14 LPA',
+                            skills: ['Network Security', 'Ethical Hacking', 'Security Tools', 'Compliance'],
+                            match: interests.some(i => i.toLowerCase().includes('security') || i.toLowerCase().includes('cyber'))
+                        }
+                    ],
+                    skills: [
+                        { category: 'Core Programming', items: ['Advanced Data Structures', 'Algorithms', 'System Design', 'OOP'] },
+                        { category: 'Web Technologies', items: ['HTML/CSS', 'JavaScript', 'React/Angular', 'Node.js', 'REST APIs'] },
+                        { category: 'Database', items: ['SQL', 'NoSQL', 'Database Design', 'Query Optimization'] },
+                        { category: 'DevOps & Tools', items: ['Git', 'Docker', 'CI/CD', 'Linux', 'Cloud Platforms'] }
+                    ],
+                    resources: [
+                        { title: 'LeetCode', type: 'Practice', description: 'Coding problems & interview prep', link: '#' },
+                        { title: 'freeCodeCamp', type: 'Course', description: 'Full stack web development', link: '#' },
+                        { title: 'Coursera ML Specialization', type: 'Course', description: 'Andrew Ng ML course', link: '#' },
+                        { title: 'AWS Certified Solutions Architect', type: 'Certification', description: 'Cloud certification', link: '#' },
+                        { title: 'GitHub Projects', type: 'Practice', description: 'Build portfolio projects', link: '#' },
+                        { title: 'HackerRank', type: 'Practice', description: 'Competitive programming', link: '#' }
+                    ]
+                },
+                'ECE': {
+                    paths: [
+                        {
+                            title: 'VLSI Design Engineer',
+                            description: 'Design and verify integrated circuits and chips',
+                            demand: 'High',
+                            avgSalary: '₹6-12 LPA',
+                            skills: ['Verilog/VHDL', 'Circuit Design', 'Cadence Tools', 'Physical Design'],
+                            match: true
+                        },
+                        {
+                            title: 'Embedded Systems Engineer',
+                            description: 'Develop firmware for IoT and embedded devices',
+                            demand: 'High',
+                            avgSalary: '₹5-10 LPA',
+                            skills: ['C/C++', 'Microcontrollers', 'RTOS', 'Hardware Interface'],
+                            match: true
+                        },
+                        {
+                            title: 'Telecommunications Engineer',
+                            description: 'Design and optimize communication networks',
+                            demand: 'Medium',
+                            avgSalary: '₹5-11 LPA',
+                            skills: ['Network Protocols', '5G Technology', 'RF Engineering', 'Signal Processing'],
+                            match: true
+                        },
+                        {
+                            title: 'IoT Solutions Architect',
+                            description: 'Build connected device ecosystems',
+                            demand: 'High',
+                            avgSalary: '₹7-14 LPA',
+                            skills: ['Embedded Systems', 'Cloud', 'Sensors', 'Data Analytics'],
+                            match: true
+                        }
+                    ],
+                    skills: [
+                        { category: 'Circuit Design', items: ['Analog Circuits', 'Digital Electronics', 'PCB Design', 'VLSI'] },
+                        { category: 'Programming', items: ['C/C++', 'Python', 'Assembly', 'MATLAB'] },
+                        { category: 'Communication', items: ['Signal Processing', 'RF Engineering', 'Network Protocols', '5G'] },
+                        { category: 'Tools', items: ['Cadence', 'MATLAB', 'Xilinx', 'Keil'] }
+                    ],
+                    resources: [
+                        { title: 'Coursera VLSI Design', type: 'Course', description: 'Complete VLSI course', link: '#' },
+                        { title: 'Arduino Projects', type: 'Practice', description: 'Hands-on embedded systems', link: '#' },
+                        { title: 'RF Circuit Design', type: 'Book', description: 'RF engineering fundamentals', link: '#' },
+                        { title: 'IoT Platforms', type: 'Practice', description: 'Build IoT solutions', link: '#' }
+                    ]
+                },
+                'EEE': {
+                    paths: [
+                        {
+                            title: 'Power Systems Engineer',
+                            description: 'Design and maintain electrical power systems',
+                            demand: 'High',
+                            avgSalary: '₹5-12 LPA',
+                            skills: ['Power Systems', 'Protection Systems', 'Grid Management', 'SCADA'],
+                            match: true
+                        },
+                        {
+                            title: 'Control Systems Engineer',
+                            description: 'Develop automation and control systems',
+                            demand: 'Medium',
+                            avgSalary: '₹5-10 LPA',
+                            skills: ['PLC', 'Control Theory', 'Automation', 'Instrumentation'],
+                            match: true
+                        },
+                        {
+                            title: 'Renewable Energy Specialist',
+                            description: 'Design solar, wind and other renewable energy systems',
+                            demand: 'Very High',
+                            avgSalary: '₹6-13 LPA',
+                            skills: ['Solar PV', 'Wind Energy', 'Energy Storage', 'Grid Integration'],
+                            match: true
+                        },
+                        {
+                            title: 'Electrical Design Engineer',
+                            description: 'Design electrical systems for buildings and industries',
+                            demand: 'High',
+                            avgSalary: '₹5-11 LPA',
+                            skills: ['AutoCAD', 'Electrical Design', 'Codes & Standards', 'Lighting Design'],
+                            match: true
+                        }
+                    ],
+                    skills: [
+                        { category: 'Power Systems', items: ['Power Generation', 'Transmission', 'Distribution', 'Protection'] },
+                        { category: 'Control & Automation', items: ['PLC Programming', 'SCADA', 'DCS', 'Control Theory'] },
+                        { category: 'Renewable Energy', items: ['Solar Design', 'Wind Energy', 'Energy Management', 'Smart Grids'] },
+                        { category: 'Software Tools', items: ['MATLAB', 'ETAP', 'AutoCAD', 'PSpice'] }
+                    ],
+                    resources: [
+                        { title: 'NPTEL Power Systems', type: 'Course', description: 'Comprehensive power systems', link: '#' },
+                        { title: 'Solar Design Tools', type: 'Software', description: 'PV system design', link: '#' },
+                        { title: 'PLC Programming', type: 'Course', description: 'Industrial automation', link: '#' },
+                        { title: 'IEEE Standards', type: 'Reference', description: 'Electrical standards', link: '#' }
+                    ]
+                },
+                'MECH': {
+                    paths: [
+                        {
+                            title: 'Design Engineer',
+                            description: 'Create mechanical designs using CAD software',
+                            demand: 'High',
+                            avgSalary: '₹4-9 LPA',
+                            skills: ['CAD', 'SolidWorks', 'Design Analysis', '3D Modeling'],
+                            match: true
+                        },
+                        {
+                            title: 'Manufacturing Engineer',
+                            description: 'Optimize production processes and quality',
+                            demand: 'High',
+                            avgSalary: '₹5-10 LPA',
+                            skills: ['Manufacturing Processes', 'Quality Control', 'Lean Manufacturing', 'CAM'],
+                            match: true
+                        },
+                        {
+                            title: 'Automotive Engineer',
+                            description: 'Design and develop automotive systems',
+                            demand: 'High',
+                            avgSalary: '₹6-12 LPA',
+                            skills: ['Automotive Design', 'Vehicle Dynamics', 'Testing', 'Simulation'],
+                            match: true
+                        },
+                        {
+                            title: 'Robotics Engineer',
+                            description: 'Build and program robotic systems',
+                            demand: 'Very High',
+                            avgSalary: '₹7-15 LPA',
+                            skills: ['Robotics', 'Mechatronics', 'Control Systems', 'Programming'],
+                            match: true
+                        }
+                    ],
+                    skills: [
+                        { category: 'Design', items: ['CAD', 'SolidWorks', 'CATIA', 'Design Analysis', 'GD&T'] },
+                        { category: 'Manufacturing', items: ['CNC', 'CAM', 'Lean Manufacturing', 'Quality Control'] },
+                        { category: 'Analysis', items: ['FEA', 'CFD', 'Thermodynamics', 'Material Science'] },
+                        { category: 'Programming', items: ['MATLAB', 'Python', 'C++', 'PLC'] }
+                    ],
+                    resources: [
+                        { title: 'SolidWorks Tutorials', type: 'Course', description: 'Complete CAD training', link: '#' },
+                        { title: 'NPTEL Manufacturing', type: 'Course', description: 'Manufacturing processes', link: '#' },
+                        { title: 'ANSYS Workbench', type: 'Software', description: 'FEA and CFD analysis', link: '#' },
+                        { title: 'Robotics Projects', type: 'Practice', description: 'Build robots', link: '#' }
+                    ]
+                },
+                'CIVIL': {
+                    paths: [
+                        {
+                            title: 'Structural Engineer',
+                            description: 'Design buildings, bridges and infrastructure',
+                            demand: 'High',
+                            avgSalary: '₹5-11 LPA',
+                            skills: ['Structural Analysis', 'Design Codes', 'STAAD Pro', 'Concrete Design'],
+                            match: true
+                        },
+                        {
+                            title: 'Construction Manager',
+                            description: 'Manage construction projects and teams',
+                            demand: 'High',
+                            avgSalary: '₹6-13 LPA',
+                            skills: ['Project Management', 'Cost Estimation', 'Quality Control', 'Safety'],
+                            match: true
+                        },
+                        {
+                            title: 'Transportation Engineer',
+                            description: 'Design roads, highways and transportation systems',
+                            demand: 'Medium',
+                            avgSalary: '₹5-10 LPA',
+                            skills: ['Highway Design', 'Traffic Engineering', 'CAD', 'GIS'],
+                            match: true
+                        },
+                        {
+                            title: 'Environmental Engineer',
+                            description: 'Design sustainable and eco-friendly systems',
+                            demand: 'High',
+                            avgSalary: '₹5-11 LPA',
+                            skills: ['Water Resources', 'Environmental Impact', 'Waste Management', 'Sustainability'],
+                            match: true
+                        }
+                    ],
+                    skills: [
+                        { category: 'Design', items: ['STAAD Pro', 'AutoCAD', 'Revit', 'Structural Design'] },
+                        { category: 'Construction', items: ['Project Management', 'Estimation', 'Scheduling', 'Quality Control'] },
+                        { category: 'Analysis', items: ['Structural Analysis', 'Soil Mechanics', 'Foundation Design', 'FEM'] },
+                        { category: 'Software', items: ['AutoCAD', 'STAAD Pro', 'Primavera', 'MS Project'] }
+                    ],
+                    resources: [
+                        { title: 'STAAD Pro Mastery', type: 'Course', description: 'Structural analysis software', link: '#' },
+                        { title: 'PMP Certification', type: 'Certification', description: 'Project management', link: '#' },
+                        { title: 'AutoCAD Civil 3D', type: 'Course', description: 'Civil engineering CAD', link: '#' },
+                        { title: 'IS Codes', type: 'Reference', description: 'Indian standards', link: '#' }
+                    ]
+                }
+            };
+
+            const deptData = careerDatabase[dept] || careerDatabase['CSE'];
+            
+            // Sort paths to show matched interests first
+            const sortedPaths = deptData.paths.sort((a, b) => b.match - a.match);
+            
+            return {
+                paths: sortedPaths.slice(0, 4), // Top 4 paths
+                skills: deptData.skills,
+                resources: deptData.resources
+            };
+        }
+
+        function renderCareerPaths(paths) {
+            const container = document.getElementById('careerPaths');
+            container.innerHTML = paths.map(path => `
+                <div class="bg-white border-2 ${path.match ? 'border-primary' : 'border-gray-200'} p-5 rounded-lg hover:shadow-md transition-shadow">
+                    ${path.match ? '<div class="text-xs font-semibold text-primary mb-2">✨ Matches Your Interests</div>' : ''}
+                    <h4 class="font-bold text-lg text-navy mb-2">${path.title}</h4>
+                    <p class="text-sm text-gray-600 mb-3">${path.description}</p>
+                    <div class="grid grid-cols-2 gap-2 text-xs mb-3">
+                        <div class="bg-blue-50 p-2 rounded">
+                            <div class="text-gray-600">Demand</div>
+                            <div class="font-semibold text-primary">${path.demand}</div>
+                        </div>
+                        <div class="bg-green-50 p-2 rounded">
+                            <div class="text-gray-600">Salary Range</div>
+                            <div class="font-semibold text-green-700">${path.avgSalary}</div>
+                        </div>
+                    </div>
+                    <div class="text-xs text-gray-600 mb-1">Key Skills:</div>
+                    <div class="flex flex-wrap gap-1">
+                        ${path.skills.map(skill => `<span class="text-xs px-2 py-1 bg-gray-100 rounded">${skill}</span>`).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderSkillsRoadmap(skills) {
+            const container = document.getElementById('skillsRoadmap');
+            container.innerHTML = skills.map(category => `
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h5 class="font-semibold text-navy mb-3">${category.category}</h5>
+                    <div class="flex flex-wrap gap-2">
+                        ${category.items.map(item => `
+                            <span class="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm hover:border-primary hover:text-primary transition-colors cursor-pointer">
+                                ${item}
+                            </span>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderLearningResources(resources) {
+            const container = document.getElementById('learningResources');
+            container.innerHTML = resources.map(resource => `
+                <div class="bg-white border border-gray-200 p-4 rounded-lg hover:shadow-md transition-shadow">
+                    <div class="flex items-start justify-between mb-2">
+                        <h5 class="font-semibold text-navy">${resource.title}</h5>
+                        <span class="status-badge ${resource.type === 'Certification' ? 'status-completed' : 'status-progress'}">
+                            ${resource.type}
+                        </span>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-3">${resource.description}</p>
+                    <a href="${resource.link}" class="text-primary text-sm font-medium hover:underline">
+                        Learn More →
+                    </a>
+                </div>
+            `).join('');
+        }
+
+        function renderSemesterButtons(records) {
+            const bar = document.getElementById('semesterFilterBar');
+            const semesters = [...records]
+                .map(r => Number(r.semester))
+                .filter(Number.isFinite)
+                .sort((a, b) => a - b);
+
+            const allBtnClass = selectedSemester === 'all'
+                ? 'btn'
+                : 'btn-secondary';
+
+            let html = `<button type="button" class="${allBtnClass}" onclick="filterSemesterRecords('all')">All Semesters</button>`;
+            html += semesters.map((sem) => {
+                const cls = selectedSemester === sem ? 'btn' : 'btn-secondary';
+                return `<button type="button" class="${cls}" onclick="filterSemesterRecords(${sem})">Semester ${sem}</button>`;
+            }).join('');
+
+            bar.innerHTML = html;
+        }
+
+        function filterSemesterRecords(sem) {
+            selectedSemester = sem;
+            renderSemesterButtons(allAcademicRecords);
+            renderAcademicRecords(allAcademicRecords, selectedSemester);
+            renderSemesterGradeChart(allAcademicRecords, selectedSemester);
+        }
+
+        // Function to render academic records
+        function renderAcademicRecords(records, semFilter = 'all') {
+            const container = document.getElementById('academicRecords');
+            container.innerHTML = '';
+
+            const filtered = semFilter === 'all'
+                ? [...records].sort((a, b) => Number(a.semester) - Number(b.semester))
+                : records.filter(r => Number(r.semester) === Number(semFilter));
+
+            if (!filtered.length) {
+                container.innerHTML = `
+                    <div class="text-center py-8 bg-gray-50 rounded-lg text-gray-500">
+                        No academic data available for this semester.
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach((semester) => {
+                const semesterDiv = document.createElement('div');
+                semesterDiv.className = 'semester-record';
+                
+                // Calculate statistics
+                const totalCredits = semester.subjects.reduce((sum, sub) => sum + sub.credits, 0);
+                const totalPoints = semester.subjects.reduce((sum, sub) => sum + (sub.credits * sub.points), 0);
+                const sgpa = (totalPoints / totalCredits).toFixed(2);
+                
+                semesterDiv.innerHTML = `
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-navy">Semester ${semester.semester}</h3>
+                            <div class="flex gap-6 text-sm">
+                                <div><span class="text-gray-600">SGPA:</span> <span class="font-bold text-primary text-lg">${sgpa}</span></div>
+                                <div><span class="text-gray-600">Credits:</span> <span class="font-semibold">${totalCredits}</span></div>
+                            </div>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="table-clean w-full">
+                                <thead>
+                                    <tr>
+                                        <th>Subject Code</th>
+                                        <th>Subject Name</th>
+                                        <th>Grade</th>
+                                        <th>Credits</th>
+                                        <th>Obtained Credits</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${semester.subjects.map(subject => {
+                                        const obtainedCredits = (subject.grade !== 'F' && subject.grade !== 'Ab') ? subject.credits : 0;
+                                        return `
+                                        <tr>
+                                            <td class="font-mono text-sm">${subject.code}</td>
+                                            <td class="font-medium">${subject.name}</td>
+                                            <td class="text-center">
+                                                <span class="status-badge ${getGradeClass(subject.grade)}">${subject.grade}</span>
+                                            </td>
+                                            <td class="text-center">${subject.credits}</td>
+                                            <td class="text-center font-semibold ${obtainedCredits > 0 ? 'text-green-600' : 'text-red-600'}">${obtainedCredits}</td>
+                                        </tr>
+                                    `}).join('')}
+                                </tbody>
+                                <tfoot>
+                                    <tr class="bg-gray-100 font-semibold">
+                                        <td colspan="3" class="text-right">Total</td>
+                                        <td class="text-center">${totalCredits}</td>
+                                        <td class="text-center text-primary text-lg">${semester.subjects.reduce((sum, sub) => sum + ((sub.grade !== 'F' && sub.grade !== 'Ab') ? sub.credits : 0), 0)}</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(semesterDiv);
+            });
+        }
+
+        let semesterGradeChart = null;
+        function renderSemesterGradeChart(records, semFilter = 'all') {
+            const ctx = document.getElementById('semesterGradeChart').getContext('2d');
+            let labels = [];
+            let data = [];
+            let label = 'SGPA';
+
+            if (semFilter === 'all') {
+                const ordered = [...records].sort((a, b) => Number(a.semester) - Number(b.semester));
+                labels = ordered.map(r => `Sem ${r.semester}`);
+                data = ordered.map(r => Number(r.sgpa) || 0);
+                label = 'Semester SGPA';
+            } else {
+                const sem = records.find(r => Number(r.semester) === Number(semFilter));
+                const subjects = sem ? sem.subjects : [];
+                labels = subjects.map(s => s.code || s.name);
+                data = subjects.map(s => Number(s.points) || 0);
+                label = `Grade Points (Sem ${semFilter})`;
+            }
+
+            if (semesterGradeChart) {
+                semesterGradeChart.destroy();
+            }
+
+            semesterGradeChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label,
+                        data,
+                        backgroundColor: '#2563eb'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10,
+                            ticks: {
+                                color: '#4b5563',
+                                font: {
+                                    family: 'Inter',
+                                    weight: '500'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(229, 231, 235, 1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#4b5563',
+                                font: {
+                                    family: 'Inter',
+                                    weight: '500'
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Helper function to get badge class based on grade
+        function getGradeClass(grade) {
+            if (grade === 'A+' || grade === 'A') return 'status-completed';
+            if (grade === 'B') return 'status-progress';
+            if (grade === 'C' || grade === 'D' || grade === 'E') return 'status-pending';
+            if (grade === 'F' || grade === 'Ab') return 'bg-red-100 text-red-700 border-red-300';
+            return 'status-pending';
+        }
+
+        // Feedback Tab Switching
+        let currentFeedbackTab = 'general';
+        function switchFeedbackTab(tab) {
+            currentFeedbackTab = tab;
+            // Update tab styles
+            ['general', 'academic', 'courses', 'career'].forEach(t => {
+                const tabBtn = document.getElementById(`tab-${t}`);
+                if (t === tab) {
+                    tabBtn.className = 'px-4 py-2 font-medium border-b-2 border-primary text-primary';
+                } else {
+                    tabBtn.className = 'px-4 py-2 font-medium border-b-2 border-transparent text-gray-600 hover:text-primary';
+                }
+            });
+            loadMentorFeedback(tab);
+        }
+
+        // Load Mentor Feedback with Timeline
+        async function loadMentorFeedback(category = 'general') {
+            let feedbacks = [];
+            try {
+                feedbacks = await Auth.getMyFeedback();
+            } catch (_) {
+                feedbacks = [];
+            }
+            feedbacks = feedbacks.filter(f => f.category === category || category === 'general');
+            
+            const container = document.getElementById('feedbackTimeline');
+            if (feedbacks.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <div class="text-4xl mb-3">💬</div>
+                        <p>No feedback available in this category yet.</p>
+                        <p class="text-sm mt-2">Your mentor will provide feedback soon.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Sort by date (newest first)
+            feedbacks.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            container.innerHTML = feedbacks.map((feedback, index) => {
+                const categoryIcons = {
+                    general: '💬',
+                    academic: '📖',
+                    courses: '🎓',
+                    career: '🎯',
+                    training: '🏋️',
+                    certification: '📜'
+                };
+                const icon = categoryIcons[feedback.category] || '💬';
+                const date = new Date(feedback.date).toLocaleDateString('en-IN', { 
+                    day: 'numeric', 
+                    month: 'short', 
+                    year: 'numeric' 
+                });
+                
+                return `
+                    <div class="relative pl-8 pb-6 ${index < feedbacks.length - 1 ? 'border-l-2 border-gray-200' : ''}">
+                        <div class="absolute left-0 top-0 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs">
+                            ${icon}
+                        </div>
+                        <div class="bg-gray-50 rounded-lg p-4 ml-4">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <h4 class="font-semibold text-navy">${feedback.title || 'Mentor Feedback'}</h4>
+                                    <p class="text-xs text-gray-600 mt-1">${date} • ${feedback.category.charAt(0).toUpperCase() + feedback.category.slice(1)}</p>
+                                </div>
+                                ${feedback.priority ? `<span class="status-badge ${feedback.priority === 'high' ? 'bg-red-100 text-red-700' : feedback.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'}">${feedback.priority.toUpperCase()}</span>` : ''}
+                            </div>
+                            <p class="text-sm text-gray-700 mt-3">${feedback.message}</p>
+                            ${feedback.actionItems ? `
+                                <div class="mt-3 pt-3 border-t border-gray-200">
+                                    <p class="text-xs font-semibold text-gray-700 mb-2">Action Items:</p>
+                                    <ul class="text-xs text-gray-600 space-y-1">
+                                        ${feedback.actionItems.split('\n').map(item => `<li class="flex items-start gap-2"><span>•</span><span>${item}</span></li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                            ${feedback.resources ? `
+                                <div class="mt-3 pt-3 border-t border-gray-200">
+                                    <p class="text-xs font-semibold text-gray-700 mb-2">Recommended Resources:</p>
+                                    <p class="text-xs text-blue-600">${feedback.resources}</p>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Career Profile Edit Functions
+        function toggleEditCareerProfile() {
+            document.getElementById('careerViewMode').style.display = 'none';
+            document.getElementById('careerEditMode').style.display = 'block';
+            document.getElementById('editCareerBtn').style.display = 'none';
+
+            // Populate form with current values
+            document.getElementById('careerGoalInput').value = window.currentCareerGoal || '';
+            const select = document.getElementById('interestsSelect');
+            const current = new Set(window.currentInterests || []);
+
+            // Ensure any existing interests not in the predefined list are added as options
+            (window.currentInterests || []).forEach((interest) => {
+                if (!Array.from(select.options).some(o => o.value === interest)) {
+                    const opt = document.createElement('option');
+                    opt.value = interest;
+                    opt.textContent = interest + ' (custom)';
+                    select.appendChild(opt);
+                }
+            });
+
+            Array.from(select.options).forEach((o) => {
+                o.selected = current.has(o.value);
+            });
+
+            document.getElementById('aspirationsInput').value = window.currentAspirations || '';
+            document.getElementById('swotStrengthsInput').value = (window.currentSwot?.strengths || []).join('\n');
+            document.getElementById('swotWeaknessesInput').value = (window.currentSwot?.weaknesses || []).join('\n');
+            document.getElementById('swotOpportunitiesInput').value = (window.currentSwot?.opportunities || []).join('\n');
+            document.getElementById('swotThreatsInput').value = (window.currentSwot?.threats || []).join('\n');
+        }
+
+        function cancelEditCareerProfile() {
+            document.getElementById('careerViewMode').style.display = 'grid';
+            document.getElementById('careerEditMode').style.display = 'none';
+            document.getElementById('editCareerBtn').style.display = 'inline-flex';
+        }
+
+        function saveCareerProfile() {
+            const newCareerGoal = document.getElementById('careerGoalInput').value.trim();
+            const select = document.getElementById('interestsSelect');
+            const newInterests = Array.from(select.selectedOptions).map(o => o.value);
+            const newAspirations = document.getElementById('aspirationsInput').value.trim();
+            const parseLines = (v) => String(v || '')
+                .split('\n')
+                .map(x => x.trim())
+                .filter(Boolean);
+            const newSwot = {
+                strengths: parseLines(document.getElementById('swotStrengthsInput').value),
+                weaknesses: parseLines(document.getElementById('swotWeaknessesInput').value),
+                opportunities: parseLines(document.getElementById('swotOpportunitiesInput').value),
+                threats: parseLines(document.getElementById('swotThreatsInput').value)
+            };
+
+            if (!newCareerGoal) {
+                Notification.show('Please enter a career goal', 'error');
+                return;
+            }
+
+            if (newInterests.length === 0) {
+                Notification.show('Please select at least one interest / skill', 'error');
+                return;
+            }
+
+            (async () => {
+                try {
+                    const updatedUser = await Auth.updateStudentProfile({
+                        careerGoal: newCareerGoal,
+                        interests: newInterests,
+                        aspirations: newAspirations,
+                        swot: newSwot
+                    });
+
+                    document.getElementById('careerGoalDisplay').textContent = newCareerGoal;
+                    document.getElementById('interestTagsDisplay').innerHTML = newInterests.map(interest =>
+                        `<span class="status-badge status-progress">${interest}</span>`
+                    ).join('');
+                    document.getElementById('aspirationsDisplay').textContent = newAspirations || 'Not set';
+                    document.getElementById('swotStrengthsDisplay').textContent = newSwot.strengths.length ? newSwot.strengths.join(', ') : 'Not set';
+                    document.getElementById('swotWeaknessesDisplay').textContent = newSwot.weaknesses.length ? newSwot.weaknesses.join(', ') : 'Not set';
+                    document.getElementById('swotOpportunitiesDisplay').textContent = newSwot.opportunities.length ? newSwot.opportunities.join(', ') : 'Not set';
+                    document.getElementById('swotThreatsDisplay').textContent = newSwot.threats.length ? newSwot.threats.join(', ') : 'Not set';
+
+                    window.currentCareerGoal = newCareerGoal;
+                    window.currentInterests = newInterests;
+                    window.currentAspirations = newAspirations;
+                    window.currentSwot = newSwot;
+
+                    Notification.show('Career profile updated successfully!', 'success');
+                    loadCareerGuidance(updatedUser);
+                    cancelEditCareerProfile();
+                } catch (e) {
+                    Notification.show(e.message || 'Failed to update profile', 'error');
+                }
+            })();
+        }
+
+        let sgpaChart = null;
+        function renderSGPAChart(records) {
+            const ordered = [...records].sort((a, b) => Number(a.semester) - Number(b.semester));
+            const labels = ordered.map(r => `Sem ${r.semester}`);
+            const data = ordered.map(r => Number(r.sgpa));
+
+            if (sgpaChart) {
+                sgpaChart.destroy();
+            }
+
+            const ctx = document.getElementById('sgpaChart').getContext('2d');
+            sgpaChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'SGPA',
+                        data,
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#2563eb',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            min: 0,
+                            max: 10,
+                            ticks: {
+                                color: '#4b5563',
+                                font: {
+                                    family: 'Inter',
+                                    weight: '500'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(229, 231, 235, 1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#4b5563',
+                                font: {
+                                    family: 'Inter',
+                                    weight: '500'
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+<!-- Scroll to Top Button -->
+    <button id="scrollTopBtn" onclick="scrollToTop()" class="scroll-top-btn" title="Go to top">↑</button>
+</body>
+</html>

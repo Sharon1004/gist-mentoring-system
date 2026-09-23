@@ -1,0 +1,1728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentor Dashboard - GIST Mentoring System</title>
+    <link rel="icon" type="image/svg+xml" href="assets/gist-logo.svg">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="app.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar py-6">
+        <div class="container mx-auto px-6 flex items-center justify-between">
+            <div class="text-xl font-semibold flex items-center gap-3 navbar-brand">
+                <img src="assets/gist-logo.svg" alt="GIST Nellore" class="brand-logo">
+                <span>GIST Mentoring System</span>
+            </div>
+            <div class="hidden md:flex items-center gap-4">
+                <span class="text-sm text-gray-600" id="mentorName"></span>
+                <a href="#" onclick="Auth.logout(); return false;" class="font-medium">Logout</a>
+            </div>
+            <div class="mobile-only-nav">
+                <span id="mentorNameMobile">Mentor</span>
+                <a href="#" onclick="Auth.logout(); return false;">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-6 py-12 max-w-7xl">
+        <!-- Quick jump -->
+        <nav class="navbar quick-jump mb-6 flex flex-wrap gap-2 p-3 bg-gray-100 rounded-xl">
+            <span class="text-sm font-semibold text-gray-600 mr-2 self-center">Quick jump:</span>
+            <a href="#section-students" class="quick-jump-link">Student List</a>
+            <a href="#section-feedback" class="quick-jump-link">Give Feedback</a>
+            <a href="#section-performance" class="quick-jump-link">Performance</a>
+            <a href="#section-history" class="quick-jump-link">Feedback History</a>
+            <a href="#section-goals" class="quick-jump-link">Goals</a>
+        </nav>
+
+        <!-- Mentor Header -->
+        <div class="gradient-primary text-gray-800 p-8 rounded-2xl mb-8 card">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                <div>
+                    <h1 class="h1 mb-3">Mentor Dashboard</h1>
+                    <div class="flex flex-wrap gap-4 text-lg opacity-95">
+                        <span id="mentorHeaderName">Mentor</span>
+                        <span>•</span>
+                        <span id="mentorHeaderDepartment">Department</span>
+                        <span>•</span>
+                        <span class="font-semibold" id="mentorHeaderStudentCount">0 Students</span>
+                    </div>
+                </div>
+                <div class="mentor-toolbar">
+                    <button type="button" class="btn-secondary" onclick="downloadAllStudentsPdf()">
+                        Download All Students PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 1: Student List and Progress Side by Side -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Student List -->
+            <div id="section-students" class="card p-6 scroll-mt-6" style="min-height: 500px;">
+                <div class="card-header">
+                    <span class="text-2xl">👥</span>
+                    <h2 class="h3 text-gist-navy">Student List</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="table-clean w-full">
+                        <thead>
+                            <tr>
+                                <th>Roll No</th>
+                                <th>Name</th>
+                                <th>CGPA</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mentorStudentsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Student Progress Panel -->
+            <div id="section-progress" class="card p-6 scroll-mt-6">
+                <div class="card-header">
+                    <span class="text-2xl">📊</span>
+                    <h2 class="h3 text-gist-navy">Student Progress</h2>
+                </div>
+                <div id="studentProgressSection">
+                    <div class="text-center py-8 text-gray-500">
+                        <div class="text-4xl mb-3">👤</div>
+                        <p>Select a student from the list to view their progress</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student Performance Analysis (Hidden by default) -->
+        <div id="studentPerformanceSection" class="card p-6 mb-8" style="display: none;">
+            <div class="card-header">
+                <span class="text-2xl">📊</span>
+                <h2 class="h3 text-gist-navy">Student Performance Analysis</h2>
+                <button onclick="closePerformanceAnalysis()" class="btn-secondary ml-auto">✕ Close</button>
+            </div>
+            
+            <!-- Student Info Header -->
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg mb-6">
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white font-bold text-xl" id="perfStudentInitials">ST</div>
+                    <div class="flex-1">
+                        <h3 class="text-xl font-bold text-navy" id="perfStudentName">-</h3>
+                        <div class="text-sm text-gray-600">
+                            <span class="font-mono" id="perfStudentRoll">-</span>
+                            <span class="mx-2">•</span>
+                            <span id="perfStudentDept">-</span>
+                            <span class="mx-2">•</span>
+                            <span id="perfStudentYear">-</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm text-gray-600">Current CGPA</div>
+                        <div class="text-3xl font-bold text-primary" id="perfStudentCGPA">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Metrics Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-green-50 p-4 rounded-lg text-center">
+                    <div class="text-xs text-gray-600 mb-1">Total Credits</div>
+                    <div class="text-2xl font-bold text-green-700" id="perfTotalCredits">52</div>
+                </div>
+                <div class="bg-purple-50 p-4 rounded-lg text-center">
+                    <div class="text-xs text-gray-600 mb-1">Semesters</div>
+                    <div class="text-2xl font-bold text-purple-700" id="perfSemesters">3</div>
+                </div>
+                <div class="bg-yellow-50 p-4 rounded-lg text-center">
+                    <div class="text-xs text-gray-600 mb-1">Trend</div>
+                    <div class="text-2xl font-bold text-yellow-700" id="perfTrend">📈</div>
+                </div>
+            </div>
+
+            <!-- Strengths and Weaknesses -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="bg-green-50 p-5 rounded-lg">
+                    <h4 class="font-bold text-green-800 mb-3 flex items-center gap-2">
+                        <span>💪</span> Strengths & Top Subjects
+                    </h4>
+                    <div id="strengthsList" class="space-y-2">
+                        <!-- Will be populated dynamically -->
+                    </div>
+                </div>
+                <div class="bg-red-50 p-5 rounded-lg">
+                    <h4 class="font-bold text-red-800 mb-3 flex items-center gap-2">
+                        <span>⚠️</span> Weaknesses & Areas to Improve
+                    </h4>
+                    <div id="weaknessesList" class="space-y-2">
+                        <!-- Will be populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- SGPA Trend Chart -->
+            <div class="mb-6">
+                <h4 class="font-semibold text-gray-800 mb-3">SGPA Trend Analysis</h4>
+                <div class="chart-container" style="height: 250px;">
+                    <canvas id="mentorSGPAChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Semester-wise Detailed Marks -->
+            <div id="semesterMarksContainer">
+                <!-- Will be populated dynamically -->
+            </div>
+
+            <!-- Career Guidance & Suggestions -->
+            <div class="mt-6 border-t-2 border-gray-200 pt-6">
+                <h4 class="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    <span class="text-2xl">🎯</span> Career Guidance & Recommendations
+                </h4>
+
+                <!-- Student's Current Interests & Goals -->
+                <div class="bg-blue-50 p-5 rounded-lg mb-6">
+                    <h5 class="font-semibold text-navy mb-3">Student's Profile</h5>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-xs text-gray-600 mb-1">Career Goal</div>
+                            <div class="font-semibold text-primary" id="studentCareerGoal">Not set</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-gray-600 mb-1">Areas of Interest</div>
+                            <div id="studentInterests" class="flex flex-wrap gap-2">
+                                <!-- Will be populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mentor's Career Path Suggestions -->
+                <div class="mb-6">
+                    <h5 class="font-semibold text-navy mb-3">Your Career Path Suggestions</h5>
+                    <form id="careerSuggestionForm" class="space-y-4">
+                        <input type="hidden" id="suggestionStudentRoll" value="">
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="form-group">
+                                <label class="form-label">Suggested Career Path <span class="text-red-500">*</span></label>
+                                <select id="suggestedCareer" class="form-input" required>
+                                    <option value="">Select a career path</option>
+                                    <optgroup label="Software Development">
+                                        <option value="Full Stack Developer">Full Stack Developer</option>
+                                        <option value="Backend Developer">Backend Developer</option>
+                                        <option value="Frontend Developer">Frontend Developer</option>
+                                        <option value="Mobile App Developer">Mobile App Developer</option>
+                                    </optgroup>
+                                    <optgroup label="Data & AI">
+                                        <option value="Data Scientist">Data Scientist</option>
+                                        <option value="Machine Learning Engineer">ML Engineer</option>
+                                        <option value="AI Researcher">AI Researcher</option>
+                                        <option value="Data Analyst">Data Analyst</option>
+                                    </optgroup>
+                                    <optgroup label="Cloud & DevOps">
+                                        <option value="Cloud Solutions Architect">Cloud Solutions Architect</option>
+                                        <option value="DevOps Engineer">DevOps Engineer</option>
+                                        <option value="Site Reliability Engineer">SRE</option>
+                                    </optgroup>
+                                    <optgroup label="Security & Networks">
+                                        <option value="Cybersecurity Analyst">Cybersecurity Analyst</option>
+                                        <option value="Network Engineer">Network Engineer</option>
+                                        <option value="Security Architect">Security Architect</option>
+                                    </optgroup>
+                                    <optgroup label="Hardware & Embedded">
+                                        <option value="VLSI Design Engineer">VLSI Design Engineer</option>
+                                        <option value="Embedded Systems Engineer">Embedded Systems Engineer</option>
+                                        <option value="IoT Solutions Architect">IoT Solutions Architect</option>
+                                    </optgroup>
+                                    <optgroup label="Other">
+                                        <option value="Product Manager">Product Manager</option>
+                                        <option value="Technical Consultant">Technical Consultant</option>
+                                        <option value="Research & Development">Research & Development</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Priority Level</label>
+                                <select id="suggestionPriority" class="form-input">
+                                    <option value="recommended">Recommended</option>
+                                    <option value="highly-recommended">Highly Recommended</option>
+                                    <option value="alternative">Alternative Path</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Why This Career Path? <span class="text-red-500">*</span></label>
+                            <textarea id="suggestionReason" class="form-input" rows="3" required
+                                placeholder="Explain why you're recommending this career path based on their strengths, interests, and performance..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Skills to Focus On</label>
+                            <input type="text" id="suggestionSkills" class="form-input" 
+                                placeholder="e.g., JavaScript, React, Node.js, System Design (comma-separated)">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Recommended Resources/Courses</label>
+                            <textarea id="suggestionResources" class="form-input" rows="2"
+                                placeholder="Suggest specific courses, certifications, or learning paths..."></textarea>
+                        </div>
+
+                        <div class="flex gap-3">
+                            <button type="submit" class="btn">
+                                💾 Save Career Suggestion
+                            </button>
+                            <button type="button" onclick="clearCareerSuggestionForm()" class="btn-secondary">
+                                Clear Form
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Previous Suggestions -->
+                <div>
+                    <h5 class="font-semibold text-navy mb-3">Previous Career Suggestions</h5>
+                    <div id="previousSuggestions" class="space-y-3">
+                        <!-- Will be populated dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 2: Feedback Panel -->
+        <div class="mb-8">
+            <!-- Feedback Panel -->
+            <div id="section-feedback" class="card p-6 scroll-mt-6">
+                <div class="card-header">
+                    <span class="text-2xl">📝</span>
+                    <h2 class="h3 text-gist-navy">Give Suggestions</h2>
+                    <button type="button" id="downloadCurrentStudentBtn" class="btn-secondary ml-auto" onclick="downloadCurrentStudentPdf()" disabled>
+                        Download Student PDF
+                    </button>
+                </div>
+                <div id="studentProfileSection" class="bg-gray-50 p-6 rounded-2xl border-2 border-gray-200 mb-6">
+                    <div class="student-profile-top">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-semibold text-sm" id="studentInitials">ST</div>
+                            <div>
+                                <div class="font-semibold text-lg" id="studentName">Select a student</div>
+                                <div class="text-xs text-gray-600" id="studentRoll">-</div>
+                            </div>
+                        </div>
+                        <div class="student-profile-meta text-xs text-gray-600">
+                            Pick a student to send feedback, review performance, and export a PDF summary.
+                        </div>
+                    </div>
+                    
+                    <form id="feedbackForm" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="form-group">
+                                <label class="form-label">Suggestions <span class="text-red-500">*</span></label>
+                                <select name="feedbackCategory" id="feedbackCategory" class="form-input" required onchange="toggleFeedbackFields()">
+                                    <option value="">Select Category</option>
+                                    <option value="general">General Suggestions</option>
+                                    <option value="academic">Academic Progress</option>
+                                    <option value="courses">Courses & Certifications</option>
+                                    <option value="training">Training & Workshops</option>
+                                    <option value="career">Career Guidance</option>
+                                    <option value="certification">Certification Guidance</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Priority <span class="text-red-500">*</span></label>
+                                <select name="priority" class="form-input" required>
+                                    <option value="">Select Priority</option>
+                                    <option value="high">High - Urgent Action Required</option>
+                                    <option value="medium">Medium - Important</option>
+                                    <option value="low">Low - For Information</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Suggestion Title <span class="text-red-500">*</span></label>
+                            <input type="text" name="feedbackTitle" class="form-input" required placeholder="e.g., Great Progress This Month, Focus on Data Structures">
+                        </div>
+
+                        <div id="courseFields" style="display: none;">
+                            <div class="form-group">
+                                <label class="form-label">Course Name <span class="text-red-500">*</span></label>
+                                <input type="text" name="courseName" class="form-input" placeholder="e.g., Python Programming, Data Structures">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Platform/Provider</label>
+                                <input type="text" name="coursePlatform" class="form-input" placeholder="e.g., Coursera, Udemy, Internal">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Course Description</label>
+                                <textarea name="courseDescription" class="form-input" rows="3" placeholder="Describe the course objectives..."></textarea>
+                            </div>
+                        </div>
+
+                        <div id="trainingFields" style="display: none;">
+                            <div class="form-group">
+                                <label class="form-label">Training/Workshop Name <span class="text-red-500">*</span></label>
+                                <input type="text" name="trainingName" class="form-input" placeholder="e.g., AI Workshop, Communication Skills">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Duration</label>
+                                <input type="text" name="trainingDuration" class="form-input" placeholder="e.g., 3 days, 20 hours">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Provider/Instructor</label>
+                                <input type="text" name="trainingProvider" class="form-input" placeholder="Organization or instructor name">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Suggestion <span class="text-red-500">*</span></label>
+                            <textarea name="feedbackMessage" id="feedbackMessage" class="form-input" rows="4" required placeholder="Provide your detailed feedback, suggestions, or recommendations..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Action Items</label>
+                            <textarea name="actionItems" class="form-input" rows="3" placeholder="List specific actions student should take (one per line)&#10;Example:&#10;Practice 5 DSA problems daily&#10;Complete React course by end of month&#10;Build portfolio project"></textarea>
+                            <p class="text-xs text-gray-600 mt-1">Enter each action item on a new line</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Recommended Resources</label>
+                            <textarea name="resources" class="form-input" rows="2" placeholder="List helpful resources: courses, websites, books, tools, etc."></textarea>
+                            <p class="text-xs text-gray-600 mt-1">Example: LeetCode, Coursera React Course, Cracking the Coding Interview</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Follow-up Date (Optional)</label>
+                            <input type="date" name="followupDate" class="form-input">
+                        </div>
+
+                        <div class="feedback-goals-grid">
+                            <div class="form-group">
+                                <label class="form-label">Goal/Objective</label>
+                                <textarea name="goal" class="form-input" rows="3" placeholder="Specific goal or objective for the student..."></textarea>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="form-group">
+                                    <label class="form-label">Deadline/Completion Date</label>
+                                    <input type="date" name="deadline" class="form-input">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Goal Notes</label>
+                                    <input type="text" name="goalNotes" class="form-input" placeholder="Optional note for the goal">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Additional Recommendations</label>
+                            <textarea name="recommendations" class="form-input" rows="3" placeholder="Any additional recommendations or resources..."></textarea>
+                        </div>
+
+                        <div class="feedback-form-actions">
+                            <button type="submit" class="btn">Submit Feedback</button>
+                            <button type="reset" class="btn-secondary" onclick="setTimeout(toggleFeedbackFields, 0)">Clear Form</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feedback History -->
+        <div id="section-history" class="card p-6 mb-8 scroll-mt-6">
+            <div class="card-header">
+                <span class="text-2xl">📚</span>
+                <h2 class="h3 text-gist-navy">Feedback History</h2>
+            </div>
+            <div class="mt-4 space-y-4"></div>
+        </div>
+
+        <!-- Goals Assigned -->
+        <div id="section-goals" class="card p-6 scroll-mt-6">
+            <div class="card-header">
+                <span class="text-2xl">🎯</span>
+                <h2 class="h3 text-gist-navy">All Goals Assigned</h2>
+            </div>
+            <div class="overflow-x-auto mt-4">
+                <table class="table-clean w-full">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Goal Type</th>
+                            <th>Goal/Objective</th>
+                            <th>Deadline</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSGPAChart = null;
+
+function renderMentorSGPAChart(data) {
+    if (currentSGPAChart) {
+        currentSGPAChart.destroy();
+    }
+
+    const ctx = document.getElementById('mentorSGPAChart');
+
+    currentSGPAChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.labels,
+            datasets: [{
+                label: 'SGPA',
+                data: data.values,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+}
+        // Check authentication
+        if (!Auth.requireAuth('mentor')) {
+            // Will redirect if not authenticated
+        } else {
+            // Load mentor data
+            const user = Auth.getCurrentUser();
+            document.querySelector('h1.h1').textContent = `Mentor Dashboard`;
+            document.getElementById('mentorName').textContent = user.name;
+            document.getElementById('mentorNameMobile').textContent = user.name;
+            document.getElementById('mentorHeaderName').textContent = user.name || 'Mentor';
+            document.getElementById('mentorHeaderDepartment').textContent = `${user.department || '-'} Department`;
+            loadMentorStudents();
+        }
+
+        function updateStudentProgressPanel(student) {
+            const progressSection = document.getElementById('studentProgressSection');
+            if (!student) {
+                progressSection.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <div class="text-4xl mb-3">👤</div>
+                        <p>Select a student from the list to view their progress</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Show student progress summary
+            const progress = student.academicRecords || [];
+            const latestSgpa = progress.length > 0 ? progress[progress.length - 1].sgpa : 'N/A';
+            const totalSemesters = progress.length;
+
+            progressSection.innerHTML = `
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg mb-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold text-sm">
+                            ${student.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-lg font-bold text-navy">${student.name}</h3>
+                            <div class="text-sm text-gray-600">
+                                ${student.rollNo} • ${student.department} • ${student.year}
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm text-gray-600">Current CGPA</div>
+                            <div class="text-2xl font-bold text-primary">${student.cgpa || 'N/A'}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="bg-green-50 p-3 rounded-lg text-center">
+                        <div class="text-lg font-bold text-green-700">${latestSgpa}</div>
+                        <div class="text-xs text-gray-600">Latest SGPA</div>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded-lg text-center">
+                        <div class="text-lg font-bold text-blue-700">${totalSemesters}</div>
+                        <div class="text-xs text-gray-600">Semesters</div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h4 class="font-semibold text-gray-800 mb-2">Semester-wise Performance</h4>
+                    <div class="space-y-2 max-h-40 overflow-y-auto">
+                        ${progress.length > 0 ? progress.map(rec => `
+                            <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                <span class="text-sm font-medium">Semester ${rec.semester}</span>
+                                <span class="text-sm font-bold text-primary">SGPA: ${rec.sgpa}</span>
+                            </div>
+                        `).join('') : '<div class="text-center text-gray-500 py-4">No academic records yet</div>'}
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadMentorStudents() {
+            try {
+                mentorStudents = await Auth.mentorGetMyStudents();
+                document.getElementById('mentorHeaderStudentCount').textContent = `${mentorStudents.length} Students`;
+                renderMentorStudentsTable(mentorStudents);
+                await renderFeedbackHistory();
+                renderGoalsTable();
+                // Don't auto-select student
+                updateStudentProgressPanel(null);
+            } catch (e) {
+                Notification.show(e.message || 'Failed to load students', 'error');
+            }
+        }
+
+        async function renderFeedbackHistory() {
+            const container = document.querySelector('#section-history .mt-4.space-y-4');
+            if (!container) return;
+            let entries = [];
+            try {
+                entries = await Auth.mentorGetFeedbackHistory();
+            } catch (_) {
+                entries = [];
+            }
+            mentorFeedbackEntries = entries;
+
+            if (!entries.length) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
+                        <div class="text-4xl mb-3">📚</div>
+                        <p>No feedback history yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = entries.slice(0, 20).map((item) => {
+                const student = mentorStudents.find(s => s.rollNo === item.rollNo);
+                const studentName = student ? student.name : item.rollNo;
+                const dateText = item.date ? new Date(item.date).toLocaleDateString('en-IN') : '-';
+                return `
+                    <div class="p-4 bg-gray-50 rounded-lg feedback-card">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <div class="font-semibold text-base">${item.title || 'Mentor Feedback'}</div>
+                                <div class="text-xs text-gray-600 mt-1">Student: ${studentName} (${item.rollNo}) • ${dateText}</div>
+                            </div>
+                            <span class="status-badge ${item.priority === 'high' ? 'status-completed' : item.priority === 'medium' ? 'status-progress' : 'status-pending'}">${(item.priority || 'low').toUpperCase()}</span>
+                        </div>
+                        <p class="text-sm text-gray-700">${item.message || ''}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderGoalsTable() {
+            const tbody = document.querySelector('#section-goals tbody');
+            if (!tbody) return;
+
+            const allowed = new Set(mentorStudents.map(s => s.rollNo));
+            const goals = DataStore.getGoals()
+                .filter(g => allowed.has(g.studentRoll))
+                .sort((a, b) => new Date(b.assignedDate || 0) - new Date(a.assignedDate || 0));
+
+            if (!goals.length) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-6 text-gray-500">No goals assigned yet.</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = goals.map((goal) => `
+                <tr>
+                    <td class="font-medium">${goal.studentName || goal.studentRoll}</td>
+                    <td><span class="status-badge status-progress">${goal.type || 'General'}</span></td>
+                    <td>${goal.goal || '-'}</td>
+                    <td class="text-gray-600">${goal.deadline ? new Date(goal.deadline).toLocaleDateString('en-IN') : '-'}</td>
+                    <td><span class="status-badge ${goal.priority === 'high' ? 'status-completed' : goal.priority === 'medium' ? 'status-progress' : 'status-pending'}">${(goal.priority || 'low').toUpperCase()}</span></td>
+                    <td><span class="status-badge ${goal.status === 'Completed' ? 'status-completed' : goal.status === 'In Progress' ? 'status-progress' : 'status-pending'}">${goal.status || 'Pending'}</span></td>
+                    <td><button class="table-action-btn secondary" onclick="selectStudent('${goal.studentRoll}', '${(goal.studentName || goal.studentRoll).replace(/'/g, "\\'")}')">View</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderMentorStudentsTable(students) {
+            const tbody = document.getElementById('mentorStudentsBody');
+            tbody.innerHTML = '';
+
+            students.forEach(student => {
+                const semesters = student.academicRecords ? student.academicRecords.length : 0;
+                const trend = semesters >= 2 && student.academicRecords[semesters - 1].sgpa > student.academicRecords[0].sgpa
+                    ? 'Improving' : semesters >= 2 && student.academicRecords[semesters - 1].sgpa < student.academicRecords[0].sgpa
+                    ? 'Declining' : 'Stable';
+                const trendClass = trend === 'Improving' ? 'status-badge status-completed' : trend === 'Stable' ? 'status-badge status-progress' : 'status-badge status-pending';
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="font-mono text-gray-600">${student.rollNo}</td>
+                    <td class="font-medium">
+                        <a href="#student-profile" onclick="selectStudent('${student.rollNo}', '${student.name.replace(/'/g, "\\'")}')" class="profile-link">${student.name}</a>
+                    </td>
+                    <td class="font-semibold">${student.cgpa ?? '-'}</td>
+                    <td><span class="${trendClass}">${trend}</span></td>
+                    <td>
+                        <div class="table-actions">
+                            <button onclick="selectStudent('${student.rollNo}', '${student.name.replace(/'/g, "\\'")}')" class="table-action-btn primary">View</button>
+                            <button onclick="downloadStudentPdf('${student.rollNo}')" class="table-action-btn secondary">PDF</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function selectStudent(rollNo, name) {
+            // Update feedback panel
+            document.getElementById('studentName').textContent = name;
+            document.getElementById('studentRoll').textContent = rollNo;
+            const initials = name.split(' ').map(n => n[0]).join('');
+            document.getElementById('studentInitials').textContent = initials.length > 2 ? initials.substring(0, 2) : initials;
+            
+            // Find student data
+            const student = mentorStudents.find(s => s.rollNo === rollNo);
+            if (!student) {
+                Notification.show('Student data not found', 'error');
+                return;
+            }
+            currentSelectedStudent = student;
+            const downloadBtn = document.getElementById('downloadCurrentStudentBtn');
+            if (downloadBtn) downloadBtn.disabled = false;
+
+            // Update progress panel
+            updateStudentProgressPanel(student);
+
+            // Update performance analysis section
+            document.getElementById('perfStudentName').textContent = name;
+            document.getElementById('perfStudentRoll').textContent = rollNo;
+            document.getElementById('perfStudentInitials').textContent = initials.length > 2 ? initials.substring(0, 2) : initials;
+            document.getElementById('perfStudentCGPA').textContent = student.cgpa;
+            document.getElementById('perfStudentDept').textContent = `${student.department || '-'} Department`;
+            document.getElementById('perfStudentYear').textContent = student.year || '-';
+
+            // Show performance section
+            const perfSection = document.getElementById('studentPerformanceSection');
+            perfSection.style.display = 'block';
+            
+            // Populate career guidance info
+            populateCareerGuidanceInfo(student);
+
+            // Populate performance data
+            if (student.academicRecords && student.academicRecords.length > 0) {
+                populatePerformanceAnalysis(student);
+            } else {
+                // Show message if no records
+                document.getElementById('semesterMarksContainer').innerHTML = `
+                    <div class="text-center py-8 bg-gray-50 rounded-lg">
+                        <div class="text-4xl mb-2">📚</div>
+                        <p class="text-gray-600">No academic records available for this student yet.</p>
+                    </div>
+                `;
+            }
+
+            // Add semester marks entry UI
+            injectSemesterEntryUI(student);
+            
+            // Scroll to performance section
+            perfSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function injectSemesterEntryUI(student) {
+            const container = document.getElementById('semesterMarksContainer');
+            const existing = document.getElementById('semesterEntryCard');
+            if (existing) existing.remove();
+
+            const card = document.createElement('div');
+            card.id = 'semesterEntryCard';
+            card.className = 'bg-white border border-gray-200 p-5 rounded-lg mb-6';
+            card.innerHTML = `
+                <h4 class="font-semibold text-navy mb-3">✍️ Enter / Update Semester Marks</h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div class="form-group">
+                        <label class="form-label">Semester</label>
+                        <input id="semNumber" type="number" min="1" max="8" class="form-input" placeholder="e.g., 4" />
+                    </div>
+                    <div class="form-group md:col-span-2">
+                        <label class="form-label">Student</label>
+                        <input class="form-input" value="${student.name} (${student.rollNo})" disabled />
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto mb-3">
+                    <table class="table-clean w-full text-sm" id="subjectsTable">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Subject</th>
+                                <th>Credits</th>
+                                <th>Marks</th>
+                                <th>Grade</th>
+                                <th>Points</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="subjectsTbody"></tbody>
+                    </table>
+                </div>
+
+                <div class="flex gap-2">
+                    <button type="button" class="btn-secondary" onclick="addSubjectRow()">+ Add Subject</button>
+                    <button type="button" class="btn" onclick="saveSemesterMarks('${student.rollNo}')">Save Semester</button>
+                </div>
+                <div class="text-xs text-gray-600 mt-2">This requires backend login as mentor. (It updates backend/data.json.)</div>
+            `;
+
+            container.prepend(card);
+            // start with 1 row
+            addSubjectRow();
+        }
+
+        function addSubjectRow(prefill = {}) {
+            const tbody = document.getElementById('subjectsTbody');
+            if (!tbody) return;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input class="form-input" style="min-width:120px" value="${prefill.code || ''}" placeholder="CS401"></td>
+                <td><input class="form-input" style="min-width:220px" value="${prefill.name || ''}" placeholder="Operating Systems"></td>
+                <td><input class="form-input" type="number" step="0.5" min="0" style="min-width:90px" value="${prefill.credits ?? ''}" placeholder="3"></td>
+                <td><input class="form-input" type="number" min="0" max="100" style="min-width:90px" value="${prefill.marks ?? ''}" placeholder="85"></td>
+                <td><input class="form-input" style="min-width:90px" value="${prefill.grade || ''}" placeholder="A+"></td>
+                <td><input class="form-input" type="number" min="0" max="10" style="min-width:90px" value="${prefill.points ?? ''}" placeholder="10"></td>
+                <td><button class="table-action-btn secondary" type="button" onclick="this.closest('tr').remove()">Remove</button></td>
+            `;
+            tbody.appendChild(tr);
+        }
+async function saveSemesterMarks(rollNo) {
+            try {
+                const sem = Number(document.getElementById('semNumber').value);
+                if (!sem) return Notification.show('Please enter semester number', 'error');
+
+                const rows = Array.from(document.querySelectorAll('#subjectsTbody tr'));
+                const subjects = rows.map(r => {
+                    const inputs = r.querySelectorAll('input');
+                    return {
+                        code: inputs[0].value.trim(),
+                        name: inputs[1].value.trim(),
+                        // Safely parse numbers to prevent NaN or undefined breaking the database
+                        credits: inputs[2].value ? Number(inputs[2].value) : 0,
+                        marks: inputs[3].value ? Number(inputs[3].value) : 0,
+                        grade: inputs[4].value.trim(),
+                        points: inputs[5].value ? Number(inputs[5].value) : 0
+                    };
+                }).filter(s => s.code && s.name);
+
+                if (subjects.length === 0) return Notification.show('Add at least one subject', 'error');
+
+                console.log("Attempting to save:", { sem, subjects }); // Debug log
+
+                await Auth.mentorUpsertSemesterRecord(rollNo, sem, subjects);
+                
+                if (window.Notification && Notification.show) {
+                    Notification.show('Semester marks saved successfully!', 'success');
+                }
+                
+                // Refresh the UI seamlessly
+                await loadMentorStudents();
+                const updatedStudent = mentorStudents.find(s => s.rollNo === rollNo);
+                if (updatedStudent) {
+                    selectStudent(updatedStudent.rollNo, updatedStudent.name);
+                }
+
+            } catch (e) {
+                console.error("Backend Save Error:", e);
+                const errorMsg = e.message || 'Failed to save semester marks';
+                if (window.Notification && Notification.show) {
+                    Notification.show(errorMsg, 'error');
+                } else {
+                    alert(errorMsg);
+                }
+            }
+        }
+        function loadSemesterForEditing(semNumber) {
+            if (!currentSelectedStudent || !currentSelectedStudent.academicRecords) return;
+
+            // Find the specific semester data from the selected student
+            const semesterData = currentSelectedStudent.academicRecords.find(r => r.semester === semNumber);
+            if (!semesterData) {
+                if (window.Notification && Notification.show) Notification.show('Semester data not found', 'error');
+                return;
+            }
+
+            // 1. Set the semester number in the top form
+            const semInput = document.getElementById('semNumber');
+            if (semInput) semInput.value = semesterData.semester;
+
+            // 2. Clear existing empty rows in the form
+            const tbody = document.getElementById('subjectsTbody');
+            if (tbody) tbody.innerHTML = '';
+
+            // 3. Populate the form with the saved subjects
+            if (semesterData.subjects && semesterData.subjects.length > 0) {
+                semesterData.subjects.forEach(subject => {
+                    // addSubjectRow automatically accepts prefill data!
+                    addSubjectRow(subject); 
+                });
+            } else {
+                addSubjectRow(); // Add one empty row if it's completely blank
+            }
+
+            // 4. Smoothly scroll the screen up to the form
+            const editCard = document.getElementById('semesterEntryCard');
+            if (editCard) {
+                editCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // Add a brief highlight effect to draw attention
+                editCard.style.transition = 'background-color 0.5s';
+                editCard.style.backgroundColor = '#eff6ff'; // light blue
+                setTimeout(() => { editCard.style.backgroundColor = ''; }, 1000);
+            }
+
+            if (window.Notification && Notification.show) {
+                Notification.show(`Loaded Semester ${semNumber} data. Modify and click Save Semester!`, 'success');
+            }
+        }
+ async function editSemesterSGPA(rollNo, semester, currentSgpa) {
+    const newSgpa = prompt(
+        `Enter SGPA for Semester ${semester} (0 - 10):`,
+        currentSgpa ?? ''
+    );
+
+    if (newSgpa === null) {
+        return;
+    }
+
+    const sgpa = Number(newSgpa);
+
+    if (!Number.isFinite(sgpa) || sgpa < 0 || sgpa > 10) {
+        alert('Please enter a valid SGPA between 0 and 10.');
+        return;
+    }
+
+    try {
+        let token = null;
+
+        if (typeof Auth !== 'undefined' && typeof Auth.getToken === 'function') {
+            token = Auth.getToken();
+        }
+
+        if (!token) {
+            const possibleKeys = [
+                'token',
+                'authToken',
+                'auth_token',
+                'jwt',
+                'mentorToken',
+                'accessToken',
+                'access_token'
+            ];
+
+            for (const key of possibleKeys) {
+                const storedToken = localStorage.getItem(key);
+
+                if (storedToken) {
+                    token = storedToken;
+                    break;
+                }
+            }
+        }
+
+        if (!token) {
+            alert('Authentication token not found. Please log in again.');
+            return;
+        }
+
+        if (window.Utils && Utils.showLoading) {
+            Utils.showLoading();
+        }
+
+        // Get the student's current academic records
+        const student = mentorStudents.find(
+            s => String(s.rollNo) === String(rollNo)
+        );
+
+        if (!student) {
+            throw new Error('Student data not found');
+        }
+
+        const records = Array.isArray(student.academicRecords)
+            ? [...student.academicRecords]
+            : [];
+
+        const recordIndex = records.findIndex(
+            record => Number(record.semester) === Number(semester)
+        );
+
+        let subjects = [];
+
+        if (recordIndex >= 0) {
+            subjects = records[recordIndex].subjects || [];
+        }
+
+        /*
+         * Keep the existing subjects and modify only the SGPA.
+         * The backend recalculates SGPA from subjects, so adjust the
+         * subject points proportionally to match the requested SGPA.
+         */
+        if (subjects.length === 0) {
+            throw new Error(
+                'This semester has no subject records. Please use "Edit Semester" instead.'
+            );
+        }
+
+        const totalCredits = subjects.reduce(
+            (sum, sub) => sum + Number(sub.credits || 0),
+            0
+        );
+
+        if (totalCredits <= 0) {
+            throw new Error('This semester has invalid credit details.');
+        }
+
+        // Update subject points so backend calculation produces requested SGPA
+        let remainingPoints = sgpa * totalCredits;
+
+        const updatedSubjects = subjects.map((sub, index) => {
+            const credits = Number(sub.credits || 0);
+
+            if (index === subjects.length - 1) {
+                const points = credits > 0
+                    ? Number((remainingPoints / credits).toFixed(2))
+                    : 0;
+
+                return {
+                    ...sub,
+                    points
+                };
+            }
+
+            const oldPoints = Number(sub.points || 0);
+            const oldTotal = subjects.reduce(
+                (sum, item) =>
+                    sum +
+                    Number(item.credits || 0) *
+                    Number(item.points || 0),
+                0
+            );
+
+            const points = oldTotal > 0
+                ? Number(
+                    (
+                        oldPoints *
+                        (sgpa * totalCredits) /
+                        oldTotal
+                    ).toFixed(2)
+                )
+                : sgpa;
+
+            remainingPoints -= credits * points;
+
+            return {
+                ...sub,
+                points
+            };
+        });
+
+        const response = await fetch(
+            `/api/mentor/students/${encodeURIComponent(rollNo)}/academic-records`,
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    semester: Number(semester),
+                    subjects: updatedSubjects
+                })
+            }
+        );
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            throw new Error(
+                data.error || 'Failed to save academic record'
+            );
+        }
+
+        if (window.Notification && Notification.show) {
+            Notification.show(
+                `Semester ${semester} SGPA updated successfully!`,
+                'success'
+            );
+        } else {
+            alert(`Semester ${semester} SGPA updated successfully!`);
+        }
+
+        await loadMentorStudents();
+
+        const updatedStudent = mentorStudents.find(
+            s => String(s.rollNo) === String(rollNo)
+        );
+
+        if (updatedStudent) {
+            selectStudent(
+                updatedStudent.rollNo,
+                updatedStudent.name
+            );
+        }
+
+    } catch (error) {
+        console.error('SGPA update error:', error);
+
+        if (window.Notification && Notification.show) {
+            Notification.show(
+                error.message || 'Failed to save academic record',
+                'error'
+            );
+        } else {
+            alert(
+                error.message || 'Failed to save academic record'
+            );
+        }
+
+    } finally {
+        if (window.Utils && Utils.hideLoading) {
+            Utils.hideLoading();
+        }
+    }
+} 
+        function populatePerformanceAnalysis(student) {
+            const records = student.academicRecords;
+            
+            // Calculate metrics
+            const totalCredits = records.reduce((sum, sem) => 
+                sum + sem.subjects.reduce((s, sub) => s + sub.credits, 0), 0);
+            
+            const trend = records.length >= 2 && records[records.length - 1].sgpa > records[0].sgpa ? '📈 Improving' : 
+                         records.length >= 2 && records[records.length - 1].sgpa < records[0].sgpa ? '📉 Declining' : '➡️ Stable';
+
+            document.getElementById('perfTotalCredits').textContent = totalCredits;
+            document.getElementById('perfSemesters').textContent = records.length;
+            document.getElementById('perfTrend').textContent = trend;
+
+            // Calculate strengths and weaknesses
+            const subjectPerformance = {};
+            records.forEach(sem => {
+                sem.subjects.forEach(sub => {
+                    if (!subjectPerformance[sub.name]) {
+                        subjectPerformance[sub.name] = { marks: [], grades: [], code: sub.code };
+                    }
+                    subjectPerformance[sub.name].marks.push(sub.marks);
+                    subjectPerformance[sub.name].grades.push(sub.grade);
+                });
+            });
+
+            const subjectAvgs = Object.entries(subjectPerformance).map(([name, data]) => ({
+                name,
+                code: data.code,
+                avg: (data.marks.reduce((a, b) => a + b, 0) / data.marks.length).toFixed(1),
+                grade: data.grades[0]
+            })).sort((a, b) => b.avg - a.avg);
+
+            // Top 5 strengths
+            const strengths = subjectAvgs.slice(0, 5);
+            document.getElementById('strengthsList').innerHTML = strengths.map(sub => `
+                <div class="flex justify-between items-center bg-white p-3 rounded border-l-4 border-green-500">
+                    <div>
+                        <div class="font-semibold text-sm text-gray-800">${sub.name}</div>
+                        <div class="text-xs text-gray-500">${sub.code}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-bold text-green-700">${sub.avg}%</div>
+                        <span class="status-badge status-completed text-xs">${sub.grade}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            // Bottom weaknesses (only subjects < 70%)
+            const weaknesses = subjectAvgs
+                .filter(sub => Number(sub.avg) < 70)
+                .slice(-5)
+                .reverse();
+            document.getElementById('weaknessesList').innerHTML = weaknesses.map(sub => `
+                <div class="flex justify-between items-center bg-white p-3 rounded border-l-4 border-red-500">
+                    <div>
+                        <div class="font-semibold text-sm text-gray-800">${sub.name}</div>
+                        <div class="text-xs text-gray-500">${sub.code}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-bold text-red-700">${sub.avg}%</div>
+                        <span class="status-badge status-pending text-xs">${sub.grade}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            // Render SGPA Chart
+            renderMentorSGPAChart(records);
+
+            // Render semester marks tables
+            renderSemesterMarks(records);
+        }
+
+        function renderMentorSGPAChart(records) {
+            // Destroy previous chart if exists
+            if (currentSGPAChart) {
+                currentSGPAChart.destroy();
+            }
+
+            const ctx = document.getElementById('mentorSGPAChart').getContext('2d');
+            const labels = records.map(r => `Sem ${r.semester}`);
+            const data = records.map(r => r.sgpa);
+
+            currentSGPAChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'SGPA',
+                        data: data,
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        borderWidth: 3,
+                        pointRadius: 6,
+                        pointBackgroundColor: '#2563eb',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 0,
+                            max: 10,
+                            ticks: {
+                                color: '#4b5563',
+                                font: { family: 'Inter', weight: '500' }
+                            },
+                            grid: { color: 'rgba(229, 231, 235, 1)' }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#4b5563',
+                                font: { family: 'Inter', weight: '500' }
+                            },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+function renderSemesterMarks(records) {
+            const container = document.getElementById('semesterMarksContainer');
+            container.innerHTML = '<h4 class="font-semibold text-gray-800 mb-4">📖 Semester-wise Detailed Marks</h4>';
+
+            records.forEach(semester => {
+                const totalCredits = semester.subjects.reduce((sum, sub) => sum + sub.credits, 0);
+                const totalPoints = semester.subjects.reduce((sum, sub) => sum + (sub.credits * sub.points), 0);
+                const avgMarks = (semester.subjects.reduce((sum, sub) => sum + sub.marks, 0) / semester.subjects.length).toFixed(1);
+
+                const semDiv = document.createElement('div');
+                semDiv.className = 'bg-gray-50 p-4 rounded-lg mb-4';
+                semDiv.innerHTML = `
+                    <div class="flex justify-between items-center mb-3">
+                        <div class="flex items-center gap-3">
+                            <h5 class="font-semibold text-navy">Semester ${semester.semester}</h5>
+                            <button type="button" onclick="loadSemesterForEditing(${semester.semester})" class="table-action-btn secondary">✏️ Edit
+</button>
+                        </div>
+                        <div class="flex gap-6 text-sm">
+                            <div><span class="text-gray-600">SGPA:</span> <span class="font-bold text-primary text-lg">${semester.sgpa}</span></div>
+                            <div><span class="text-gray-600">Credits:</span> <span class="font-semibold">${totalCredits}</span></div>
+                            <div><span class="text-gray-600">Avg:</span> <span class="font-semibold">${avgMarks}%</span></div>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="table-clean w-full text-sm">
+                            <thead>
+                                <tr>
+                                    <th>Subject Code</th>
+                                    <th>Subject Name</th>
+                                    <th>Grade</th>
+                                    <th>Credits</th>
+                                    <th>Obtained Credits</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${semester.subjects.map(sub => {
+                                    const obtainedCredits = (sub.grade !== 'F' && sub.grade !== 'Ab') ? sub.credits : 0;
+                                    return `
+                                    <tr>
+                                        <td class="font-mono text-xs">${sub.code}</td>
+                                        <td class="font-medium">${sub.name}</td>
+                                        <td class="text-center">
+                                            <span class="status-badge ${getGradeClass(sub.grade)}">${sub.grade}</span>
+                                        </td>
+                                        <td class="text-center">${sub.credits}</td>
+                                        <td class="text-center font-semibold ${obtainedCredits > 0 ? 'text-green-600' : 'text-red-600'}">${obtainedCredits}</td>
+                                    </tr>
+                                `}).join('')}
+                            </tbody>
+                            <tfoot>
+                                <tr class="bg-white font-semibold">
+                                    <td colspan="3" class="text-right">Total</td>
+                                    <td class="text-center">${totalCredits}</td>
+                                    <td class="text-center text-primary">${semester.subjects.reduce((sum, sub) => sum + ((sub.grade !== 'F' && sub.grade !== 'Ab') ? sub.credits : 0), 0)}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                `;
+                container.appendChild(semDiv);
+            });
+        }
+    function getGradeClass(grade) {
+            if (grade === 'A+' || grade === 'A') return 'status-completed';
+            if (grade === 'B') return 'status-progress';
+            if (grade === 'C' || grade === 'D' || grade === 'E') return 'status-pending';
+            if (grade === 'F' || grade === 'Ab') return 'bg-red-100 text-red-700 border-red-300';
+            return 'status-pending';
+        }
+
+        function closePerformanceAnalysis() {
+            document.getElementById('studentPerformanceSection').style.display = 'none';
+            if (currentSGPAChart) {
+                currentSGPAChart.destroy();
+                currentSGPAChart = null;
+            }
+        }
+
+        function populateCareerGuidanceInfo(student) {
+            // Set student roll for form
+            document.getElementById('suggestionStudentRoll').value = student.rollNo;
+
+            // Display student's career goal
+            document.getElementById('studentCareerGoal').textContent = student.careerGoal || 'Not set yet';
+
+            // Display student's interests
+            const interestsContainer = document.getElementById('studentInterests');
+            const interests = student.interests || ['Not specified'];
+            interestsContainer.innerHTML = interests.map(interest => 
+                `<span class="status-badge status-progress">${interest}</span>`
+            ).join('');
+
+            // Load and display previous suggestions
+            loadPreviousSuggestions(student.rollNo);
+        }
+
+        function loadPreviousSuggestions(rollNo) {
+            const suggestions = DataStore.getCareerSuggestions(rollNo) || [];
+            const container = document.getElementById('previousSuggestions');
+
+            if (suggestions.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-6 bg-gray-50 rounded-lg text-gray-500 text-sm">
+                        No career suggestions yet. Add your first recommendation above.
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = suggestions.map((suggestion, index) => `
+                <div class="bg-white border border-gray-200 p-4 rounded-lg">
+                    <div class="flex items-start justify-between mb-3">
+                        <div>
+                            <h6 class="font-bold text-navy text-lg">${suggestion.careerPath}</h6>
+                            <div class="text-xs text-gray-500 mt-1">
+                                Suggested on ${new Date(suggestion.date).toLocaleDateString('en-IN')}
+                            </div>
+                        </div>
+                        <span class="status-badge ${
+                            suggestion.priority === 'highly-recommended' ? 'status-completed' : 
+                            suggestion.priority === 'recommended' ? 'status-progress' : 
+                            'status-pending'
+                        }">
+                            ${suggestion.priority === 'highly-recommended' ? '⭐ Highly Recommended' : 
+                              suggestion.priority === 'recommended' ? '👍 Recommended' : 
+                              '💡 Alternative'}
+                        </span>
+                    </div>
+                    <div class="mb-3">
+                        <div class="text-sm font-semibold text-gray-700 mb-1">Reasoning:</div>
+                        <p class="text-sm text-gray-600">${suggestion.reason}</p>
+                    </div>
+                    ${suggestion.skills ? `
+                        <div class="mb-3">
+                            <div class="text-sm font-semibold text-gray-700 mb-2">Focus Skills:</div>
+                            <div class="flex flex-wrap gap-2">
+                                ${suggestion.skills.split(',').map(skill => 
+                                    `<span class="text-xs px-2 py-1 bg-blue-50 text-primary rounded">${skill.trim()}</span>`
+                                ).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${suggestion.resources ? `
+                        <div>
+                            <div class="text-sm font-semibold text-gray-700 mb-1">Resources:</div>
+                            <p class="text-sm text-gray-600">${suggestion.resources}</p>
+                        </div>
+                    ` : ''}
+                </div>
+            `).reverse().join('');
+        }
+
+        function clearCareerSuggestionForm() {
+            document.getElementById('careerSuggestionForm').reset();
+        }
+
+        function escapePdfText(value) {
+            if (value === null || value === undefined || value === '') return '-';
+            if (Array.isArray(value)) return value.join(', ');
+            return String(value).replace(/\s+/g, ' ').trim() || '-';
+        }
+
+        function buildStudentExportData(student) {
+            if (!student) return null;
+
+            const goals = DataStore.getGoals()
+                .filter(goal => goal.studentRoll === student.rollNo)
+                .sort((a, b) => new Date(b.assignedDate || 0) - new Date(a.assignedDate || 0));
+
+            const careerSuggestions = DataStore.getCareerSuggestions(student.rollNo)
+                .slice()
+                .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+
+            const feedback = mentorFeedbackEntries
+                .filter(item => item.rollNo === student.rollNo)
+                .slice()
+                .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+
+            return { student, goals, careerSuggestions, feedback };
+        }
+
+        function createPdfDocument(title) {
+            const jsPdf = window.jspdf && window.jspdf.jsPDF;
+            if (!jsPdf) throw new Error('PDF library failed to load');
+
+            const doc = new jsPdf({ unit: 'pt', format: 'a4' });
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            const margin = 40;
+            let cursorY = 52;
+
+            function ensureSpace(height = 24) {
+                if (cursorY + height <= pageHeight - margin) return;
+                doc.addPage();
+                cursorY = margin;
+            }
+
+            function writeWrapped(text, options = {}) {
+                const fontSize = options.fontSize || 11;
+                const lineGap = options.lineGap || 16;
+                const indent = options.indent || 0;
+                const width = options.width || (pageWidth - (margin * 2) - indent);
+                const lines = doc.splitTextToSize(escapePdfText(text), width);
+                doc.setFont('helvetica', options.fontStyle || 'normal');
+                doc.setFontSize(fontSize);
+                lines.forEach(line => {
+                    ensureSpace(lineGap);
+                    doc.text(line, margin + indent, cursorY);
+                    cursorY += lineGap;
+                });
+            }
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(18);
+            doc.text(title, margin, cursorY);
+            cursorY += 24;
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            doc.text(`Generated on ${new Date().toLocaleString('en-IN')}`, margin, cursorY);
+            cursorY += 18;
+
+            return {
+                doc,
+                addSection(sectionTitle) {
+                    ensureSpace(28);
+                    cursorY += 6;
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(13);
+                    doc.text(sectionTitle, margin, cursorY);
+                    cursorY += 16;
+                    doc.setDrawColor(210, 214, 220);
+                    doc.line(margin, cursorY, pageWidth - margin, cursorY);
+                    cursorY += 16;
+                },
+                addLine(label, value) {
+                    writeWrapped(`${label}: ${escapePdfText(value)}`);
+                },
+                addBullet(value) {
+                    writeWrapped(`• ${escapePdfText(value)}`, { indent: 8, width: pageWidth - (margin * 2) - 8 });
+                },
+                addParagraph(value) {
+                    writeWrapped(value);
+                },
+                addGap(size = 8) {
+                    ensureSpace(size);
+                    cursorY += size;
+                },
+                newPage() {
+                    doc.addPage();
+                    cursorY = margin;
+                },
+                save(filename) {
+                    doc.save(filename);
+                }
+            };
+        }
+
+        function renderStudentPdfContent(pdf, payload) {
+            const { student, feedback, goals, careerSuggestions } = payload;
+
+            pdf.addSection('Student Profile');
+            pdf.addLine('Name', student.name);
+            pdf.addLine('Roll No', student.rollNo);
+            pdf.addLine('Department', student.department || '-');
+            pdf.addLine('Year', student.year || '-');
+            pdf.addLine('CGPA', student.cgpa ?? '-');
+            pdf.addLine('Career Goal', student.careerGoal || '-');
+            pdf.addLine('Interests', (student.interests || []).join(', ') || '-');
+
+            pdf.addSection('Academic Records');
+            if (student.academicRecords && student.academicRecords.length) {
+                student.academicRecords.forEach(record => {
+                    pdf.addLine(`Semester ${record.semester}`, `SGPA ${record.sgpa}`);
+                    (record.subjects || []).forEach(subject => {
+                        pdf.addBullet(`${subject.code} - ${subject.name} | Marks ${subject.marks} | Grade ${subject.grade} | Credits ${subject.credits}`);
+                    });
+                    pdf.addGap(6);
+                });
+            } else {
+                pdf.addParagraph('No academic records available.');
+            }
+
+            pdf.addSection('Mentor Feedback');
+            if (feedback.length) {
+                feedback.forEach(item => {
+                    pdf.addLine(item.title || 'Feedback', `${item.priority || 'low'} priority | ${item.date ? new Date(item.date).toLocaleDateString('en-IN') : '-'}`);
+                    pdf.addParagraph(item.message || '-');
+                    if (item.actionItems) pdf.addLine('Action Items', item.actionItems);
+                    if (item.resources) pdf.addLine('Resources', item.resources);
+                    pdf.addGap(6);
+                });
+            } else {
+                pdf.addParagraph('No mentor feedback recorded.');
+            }
+
+            pdf.addSection('Assigned Goals');
+            if (goals.length) {
+                goals.forEach(goal => {
+                    pdf.addLine(goal.type || 'Goal', `${goal.priority || 'low'} priority | ${goal.status || 'Pending'}`);
+                    pdf.addParagraph(goal.goal || '-');
+                    pdf.addLine('Deadline', goal.deadline ? new Date(goal.deadline).toLocaleDateString('en-IN') : '-');
+                    if (goal.goalNotes) pdf.addLine('Goal Notes', goal.goalNotes);
+                    pdf.addGap(6);
+                });
+            } else {
+                pdf.addParagraph('No goals assigned.');
+            }
+
+            pdf.addSection('Career Suggestions');
+            if (careerSuggestions.length) {
+                careerSuggestions.forEach(suggestion => {
+                    pdf.addLine(suggestion.careerPath || 'Suggestion', `${suggestion.priority || '-'} | ${suggestion.date ? new Date(suggestion.date).toLocaleDateString('en-IN') : '-'}`);
+                    pdf.addParagraph(suggestion.reason || '-');
+                    if (suggestion.skills) pdf.addLine('Skills', suggestion.skills);
+                    if (suggestion.resources) pdf.addLine('Resources', suggestion.resources);
+                    pdf.addGap(6);
+                });
+            } else {
+                pdf.addParagraph('No career suggestions recorded.');
+            }
+        }
+
+        function downloadStudentPdf(rollNo) {
+            const student = mentorStudents.find(item => item.rollNo === rollNo);
+            if (!student) {
+                Notification.show('Student data not found', 'error');
+                return;
+            }
+
+            try {
+                const pdf = createPdfDocument(`Student Report - ${student.name}`);
+                renderStudentPdfContent(pdf, buildStudentExportData(student));
+                pdf.save(`${student.rollNo}-student-report.pdf`);
+            } catch (error) {
+                Notification.show(error.message || 'Failed to generate PDF', 'error');
+            }
+        }
+
+        function downloadCurrentStudentPdf() {
+            if (!currentSelectedStudent) {
+                Notification.show('Select a student first', 'error');
+                return;
+            }
+
+            downloadStudentPdf(currentSelectedStudent.rollNo);
+        }
+
+        function downloadAllStudentsPdf() {
+            if (!mentorStudents.length) {
+                Notification.show('No students available to export', 'error');
+                return;
+            }
+
+            try {
+                const pdf = createPdfDocument('All Students Report');
+                mentorStudents.forEach((student, index) => {
+                    if (index > 0) pdf.newPage();
+                    renderStudentPdfContent(pdf, buildStudentExportData(student));
+                });
+                pdf.save('all-students-report.pdf');
+            } catch (error) {
+                Notification.show(error.message || 'Failed to generate PDF', 'error');
+            }
+        }
+
+        // Handle career suggestion form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            const careerForm = document.getElementById('careerSuggestionForm');
+            if (careerForm) {
+                careerForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    const rollNo = document.getElementById('suggestionStudentRoll').value;
+                    const careerPath = document.getElementById('suggestedCareer').value;
+                    const priority = document.getElementById('suggestionPriority').value;
+                    const reason = document.getElementById('suggestionReason').value;
+                    const skills = document.getElementById('suggestionSkills').value;
+                    const resources = document.getElementById('suggestionResources').value;
+
+                    if (!rollNo || !careerPath || !reason) {
+                        Notification.show('Please fill in all required fields', 'error');
+                        return;
+                    }
+
+                    const suggestion = {
+                        careerPath,
+                        priority,
+                        reason,
+                        skills,
+                        resources,
+                        date: new Date().toISOString(),
+                        mentorName: Auth.getCurrentUser().name
+                    };
+
+                    // Save suggestion
+                    DataStore.addCareerSuggestion(rollNo, suggestion);
+
+                    // Show success message
+                    Notification.show(`Career path "${careerPath}" suggested successfully!`, 'success');
+
+                    // Reload suggestions
+                    loadPreviousSuggestions(rollNo);
+
+                    // Clear form
+                    clearCareerSuggestionForm();
+                });
+            }
+        });
+
+        function toggleFeedbackFields() {
+            const feedbackCategory = document.getElementById('feedbackCategory')?.value;
+            if (feedbackCategory) {
+                const courseFields = document.getElementById('courseFields');
+                const trainingFields = document.getElementById('trainingFields');
+                if (courseFields) courseFields.style.display = feedbackCategory === 'courses' ? 'block' : 'none';
+                if (trainingFields) trainingFields.style.display = feedbackCategory === 'training' ? 'block' : 'none';
+            }
+        }
+
+        document.getElementById('feedbackForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const studentName = document.getElementById('studentName').textContent;
+            const studentRoll = document.getElementById('studentRoll').textContent;
+
+            if (!studentRoll || studentRoll === '-') {
+                Notification.show('Please select a student first', 'error');
+                return;
+            }
+            
+            // Validate required fields
+            if (!formData.get('feedbackCategory')) {
+                Notification.show('Please select feedback category', 'error');
+                return;
+            }
+            
+            if (!formData.get('feedbackTitle')) {
+                Notification.show('Please provide feedback title', 'error');
+                return;
+            }
+
+            if (!formData.get('feedbackMessage')) {
+                Notification.show('Please provide feedback message', 'error');
+                return;
+            }
+
+            if (!formData.get('priority')) {
+                Notification.show('Please select priority', 'error');
+                return;
+            }
+            
+            // Show loading
+            Utils.showLoading();
+            try {
+                await Auth.mentorAddFeedback(studentRoll, {
+                    category: formData.get('feedbackCategory'),
+                    title: formData.get('feedbackTitle'),
+                    message: formData.get('feedbackMessage'),
+                    priority: formData.get('priority'),
+                    actionItems: formData.get('actionItems') || null,
+                    resources: formData.get('resources') || formData.get('recommendations') || null
+                });
+
+                // Save goal if provided
+                if (formData.get('goal')) {
+                    const goal = {
+                        studentName,
+                        studentRoll,
+                        type: formData.get('feedbackCategory'),
+                        goal: formData.get('goal'),
+                        goalNotes: formData.get('goalNotes') || null,
+                        deadline: formData.get('deadline'),
+                        priority: formData.get('priority'),
+                        status: 'Pending'
+                    };
+                    DataStore.addGoal(goal);
+                }
+
+                Notification.show(`Feedback submitted successfully to ${studentName}!`, 'success');
+                document.getElementById('feedbackForm').reset();
+                toggleFeedbackFields();
+                await renderFeedbackHistory();
+                renderGoalsTable();
+            } catch (err) {
+                Notification.show(err.message || 'Failed to send feedback', 'error');
+            } finally {
+                Utils.hideLoading();
+            }
+        });
+    </script>
+
+<!-- Scroll to Top Button -->
+    <button id="scrollTopBtn" onclick="scrollToTop()" class="scroll-top-btn" title="Go to top">↑</button>
+</body>
+</html>

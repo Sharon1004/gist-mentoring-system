@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Registration - GIST Mentoring System</title>
+    <link rel="icon" type="image/svg+xml" href="assets/gist-logo.svg" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="app.js"></script>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar py-6">
+      <div class="container mx-auto px-6 flex items-center justify-between">
+        <a
+          href="index.html"
+          class="text-xl font-semibold flex items-center gap-3 navbar-brand"
+        >
+          <img
+            src="assets/gist-logo.svg"
+            alt="GIST Nellore"
+            class="brand-logo"
+          />
+          <span>GIST Mentoring System</span>
+        </a>
+        <div class="hidden md:flex items-center gap-4">
+          <a href="index.html" class="font-medium">Home</a>
+          <a href="student-dashboard.html" class="font-medium">Dashboard</a>
+        </div>
+        <div class="mobile-only-nav">
+          <a href="index.html">Home</a>
+          <a href="student-dashboard.html">Dashboard</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container mx-auto px-6 py-12 max-w-6xl">
+      <!-- Header -->
+      <div class="gradient-primary text-gray-800 p-8 rounded-2xl mb-8 card">
+        <h1 class="h1 mb-2 text-center">Student Registration</h1>
+        <p class="text-base text-center opacity-90">
+          Complete your profile to get the best mentoring experience
+        </p>
+      </div>
+
+      <form id="registrationForm" class="space-y-8">
+        <!-- Personal Details Section -->
+        <div class="card p-10 fade-in-up">
+          <div class="card-header">
+            <span class="text-3xl">👤</span>
+            <h2 class="h3 text-gist-navy">Personal Details</h2>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+            <div class="form-group">
+              <label class="form-label"
+                >Full Name <span class="text-red-500">*</span></label
+              >
+              <input
+                type="text"
+                name="fullName"
+                class="form-input"
+                required
+                placeholder="Enter your full name"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label"
+                >Roll Number <span class="text-red-500">*</span></label
+              >
+              <input
+                type="text"
+                name="rollNumber"
+                class="form-input"
+                required
+                placeholder="222U1A0522 (year+2U1A+branch+number)"
+                pattern="/^\d{2}2U[15]A\d{4,}$/"
+                title="Format: 222U1A0522"
+              />
+              <p class="text-xs text-gray-500 mt-1">
+                Format: year (2 digits) + 2U1A + branch code (2 digits) + number
+                (e.g. 222U1A0522)
+              </p>
+            </div>
+            <div class="form-group">
+              <label class="form-label"
+                >Password <span class="text-red-500">*</span></label
+              >
+              <input
+                type="password"
+                name="password"
+                class="form-input"
+                required
+                minlength="6"
+                placeholder="Min 6 characters"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label"
+                >Confirm Password <span class="text-red-500">*</span></label
+              >
+              <input
+                type="password"
+                name="confirmPassword"
+                class="form-input"
+                required
+                minlength="6"
+                placeholder="Re-enter password"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label"
+                >Date of Birth <span class="text-red-500">*</span></label
+              >
+              <input type="date" name="dob" class="form-input" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label"
+                >Gender <span class="text-red-500">*</span></label
+              >
+              <select name="gender" class="form-input" required>
+                <option value="">Select Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label"
+                >Email <span class="text-red-500">*</span></label
+              >
+              <input
+                type="email"
+                name="email"
+                class="form-input"
+                required
+                placeholder="student@example.com"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label"
+                >Phone Number <span class="text-red-500">*</span></label
+              >
+              <input
+                type="tel"
+                name="phone"
+                class="form-input"
+                required
+                placeholder="+91 9876543210"
+              />
+            </div>
+            <div class="form-group md:col-span-2">
+              <label class="form-label"
+                >Address <span class="text-red-500">*</span></label
+              >
+              <textarea
+                name="address"
+                class="form-input"
+                rows="3"
+                required
+                placeholder="Enter your complete address"
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label"
+                >City <span class="text-red-500">*</span></label
+              >
+              <input
+                type="text"
+                name="city"
+                class="form-input"
+                required
+                placeholder="City"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label"
+                >State <span class="text-red-500">*</span></label
+              >
+              <input
+                type="text"
+                name="state"
+                class="form-input"
+                required
+                placeholder="State"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label"
+                >PIN Code <span class="text-red-500">*</span></label
+              >
+              <input
+                type="text"
+                name="pincode"
+                class="form-input"
+                required
+                placeholder="524001"
+                pattern="[0-9]{6}"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Academic Details Section -->
+        <div class="card p-10 fade-in-up">
+          <div class="card-header">
+            <span class="text-3xl">🎓</span>
+            <h2 class="h3 text-gist-navy">Academic Details</h2>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+            <div class="form-group">
+              <label class="form-label"
+                >Branch <span class="text-red-500">*</span></label
+              >
+              <select
+                name="branch"
+                id="branchSelect"
+                class="form-input"
+                required
+              >
+                <option value="">Select Branch</option>
+                <!-- Will be populated dynamically -->
+                <!--
+                <option value="AIML">
+                  Artificial Intelligence & Machine Learning
+                </option>
+                <option value="AIDS">
+                  Artificial Intelligence & Data Science
+                </option>
+                <option value="DS">Data Science</option>
+                <option value="CS">Cyber Security</option>
+                <option value="CSE">Computer Science and Engineering</option>
+                <option value="ECE">
+                  Electronics and Communication Engineering
+                </option>
+                <option value="EEE">
+                  Electrical and Electronics Engineering
+                </option>
+                <option value="ME">Mechanical Engineering</option>
+                <option value="CIVIL">Civil Engineering</option>
+            -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label"
+                >Year <span class="text-red-500">*</span></label
+              >
+              <select name="year" class="form-input" required>
+                <option value="">Select Year</option>
+                <option value="1">I B.Tech</option>
+                <option value="2">II B.Tech</option>
+                <option value="3">III B.Tech</option>
+                <option value="4">IV B.Tech</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Section</label>
+              <input
+                type="text"
+                name="section"
+                class="form-input"
+                placeholder="A"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Current CGPA</label>
+              <input
+                type="number"
+                name="cgpa"
+                class="form-input"
+                step="0.01"
+                min="0"
+                max="10"
+                placeholder="8.34"
+              />
+            </div>
+          </div>
+
+          <div class="mt-8">
+            <h3 class="text-xl font-bold text-gist-navy mb-6">
+              10th Class Details
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="form-group">
+                <label class="form-label"
+                  >Board <span class="text-red-500">*</span></label
+                >
+                <input
+                  type="text"
+                  name="tenthBoard"
+                  class="form-input"
+                  required
+                  placeholder="SSC/AP Board"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label"
+                  >Year of Passing <span class="text-red-500">*</span></label
+                >
+                <input
+                  type="number"
+                  name="tenthYear"
+                  class="form-input"
+                  required
+                  min="2000"
+                  max="2030"
+                  placeholder="2020"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label"
+                  >Percentage/CGPA <span class="text-red-500">*</span></label
+                >
+                <input
+                  type="number"
+                  name="tenthPercentage"
+                  class="form-input"
+                  required
+                  step="0.01"
+                  placeholder="95.5"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-8">
+            <h3 class="text-xl font-bold text-gist-navy mb-6">
+              Intermediate Details
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="form-group">
+                <label class="form-label"
+                  >Board <span class="text-red-500">*</span></label
+                >
+                <input
+                  type="text"
+                  name="interBoard"
+                  class="form-input"
+                  required
+                  placeholder="BIEAP/TSBIE"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label"
+                  >Year of Passing <span class="text-red-500">*</span></label
+                >
+                <input
+                  type="number"
+                  name="interYear"
+                  class="form-input"
+                  required
+                  min="2000"
+                  max="2030"
+                  placeholder="2022"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label"
+                  >Percentage/CGPA <span class="text-red-500">*</span></label
+                >
+                <input
+                  type="number"
+                  name="interPercentage"
+                  class="form-input"
+                  required
+                  step="0.01"
+                  placeholder="98.2"
+                />
+              </div>
+              <div class="form-group md:col-span-3">
+                <label class="form-label">Stream</label>
+                <select name="interStream" class="form-input">
+                  <option value="">Select Stream</option>
+                  <option value="MPC">MPC (Maths, Physics, Chemistry)</option>
+                  <option value="BIPC">
+                    BiPC (Biology, Physics, Chemistry)
+                  </option>
+                  <option value="CEC">CEC (Commerce, Economics, Civics)</option>
+                  <option value="MEC">MEC (Maths, Economics, Commerce)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Family Details Section -->
+        <div class="card p-10 fade-in-up">
+          <div class="card-header">
+            <span class="text-3xl">👨‍👩‍👧‍👦</span>
+            <h2 class="h3 text-gist-navy">Family Details</h2>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+            <div class="form-group">
+              <label class="form-label"
+                >Father's Name <span class="text-red-500">*</span></label
+              >
+              <input
+                type="text"
+                name="fatherName"
+                class="form-input"
+                required
+                placeholder="Father's full name"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Father's Occupation</label>
+              <input
+                type="text"
+                name="fatherOccupation"
+                class="form-input"
+                placeholder="Occupation"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Father's Phone</label>
+              <input
+                type="tel"
+                name="fatherPhone"
+                class="form-input"
+                placeholder="+91 9876543210"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Father's Email</label>
+              <input
+                type="email"
+                name="fatherEmail"
+                class="form-input"
+                placeholder="father@example.com"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label"
+                >Mother's Name <span class="text-red-500">*</span></label
+              >
+              <input
+                type="text"
+                name="motherName"
+                class="form-input"
+                required
+                placeholder="Mother's full name"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Mother's Occupation</label>
+              <input
+                type="text"
+                name="motherOccupation"
+                class="form-input"
+                placeholder="Occupation"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Mother's Phone</label>
+              <input
+                type="tel"
+                name="motherPhone"
+                class="form-input"
+                placeholder="+91 9876543210"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Annual Family Income</label>
+              <select name="familyIncome" class="form-input">
+                <option value="">Select Range</option>
+                <option value="<2L">Less than ₹2 Lakhs</option>
+                <option value="2-5L">₹2 - ₹5 Lakhs</option>
+                <option value="5-10L">₹5 - ₹10 Lakhs</option>
+                <option value="10-20L">₹10 - ₹20 Lakhs</option>
+                <option value=">20L">Above ₹20 Lakhs</option>
+              </select>
+            </div>
+            <div class="form-group md:col-span-2">
+              <label class="form-label">Number of Siblings</label>
+              <input
+                type="number"
+                name="siblings"
+                class="form-input"
+                min="0"
+                placeholder="0"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Aspirations Section -->
+        <div class="card p-10 fade-in-up">
+          <div class="card-header">
+            <span class="text-3xl">🎯</span>
+            <h2 class="h3 text-gist-navy">Aspirations & Goals</h2>
+          </div>
+          <div class="space-y-6 mt-8">
+            <div class="form-group">
+              <label class="form-label"
+                >What do you want to be in life?
+                <span class="text-red-500">*</span></label
+              >
+              <textarea
+                name="lifeGoal"
+                class="form-input"
+                rows="4"
+                required
+                placeholder="Describe your life goals and aspirations..."
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label"
+                >What is your goal for your job/career?
+                <span class="text-red-500">*</span></label
+              >
+              <textarea
+                name="careerGoal"
+                class="form-input"
+                rows="4"
+                required
+                placeholder="Describe your career goals, dream company, role, etc..."
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label"
+                >Why did you choose Engineering?
+                <span class="text-red-500">*</span></label
+              >
+              <textarea
+                name="whyEngineering"
+                class="form-input"
+                rows="4"
+                required
+                placeholder="Explain your motivation for choosing engineering..."
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label"
+                >Where do you see yourself 5 years from now?</label
+              >
+              <textarea
+                name="fiveYearsVision"
+                class="form-input"
+                rows="3"
+                placeholder="Describe your 5-year vision..."
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- SWOT Analysis Section -->
+        <div class="card p-10 fade-in-up">
+          <div class="card-header">
+            <span class="text-3xl">📊</span>
+            <h2 class="h3 text-gist-navy">SWOT Analysis</h2>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+            <div class="form-group">
+              <label class="form-label"
+                >Strengths <span class="text-red-500">*</span></label
+              >
+              <textarea
+                name="strengths"
+                class="form-input"
+                rows="6"
+                required
+                placeholder="List your strengths: technical skills, soft skills, achievements, etc..."
+              ></textarea>
+              <p class="text-sm text-gray-600 mt-2">
+                Example: Strong in programming, good communication, leadership
+                experience
+              </p>
+            </div>
+            <div class="form-group">
+              <label class="form-label"
+                >Weaknesses <span class="text-red-500">*</span></label
+              >
+              <textarea
+                name="weaknesses"
+                class="form-input"
+                rows="6"
+                required
+                placeholder="List areas you need to improve..."
+              ></textarea>
+              <p class="text-sm text-gray-600 mt-2">
+                Example: Weak in time management, need to improve DSA skills
+              </p>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Opportunities (Optional)</label>
+              <textarea
+                name="opportunities"
+                class="form-input"
+                rows="4"
+                placeholder="List opportunities available to you..."
+              ></textarea>
+              <p class="text-sm text-gray-600 mt-2">
+                Example: Internship opportunities, hackathons, online courses
+              </p>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Threats (Optional)</label>
+              <textarea
+                name="threats"
+                class="form-input"
+                rows="4"
+                placeholder="List potential challenges or threats..."
+              ></textarea>
+              <p class="text-sm text-gray-600 mt-2">
+                Example: High competition, rapidly changing technology
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="page-actions mt-12">
+          <button
+            type="button"
+            onclick="window.history.back()"
+            class="btn-secondary"
+          >
+            Cancel
+          </button>
+          <button type="submit" class="btn">Submit Registration</button>
+        </div>
+      </form>
+    </div>
+
+   <script>
+      // Load branches on page load
+      document.addEventListener("DOMContentLoaded", function () {
+        loadBranches();
+      });
+
+      async function loadBranches() {
+        try {
+          const res = await fetch("/api/branches");
+          const branches = await res.json();
+
+          // If the database is empty, throw an error to trigger the fallback options
+          if (!branches || branches.length === 0) {
+            throw new Error("Database returned an empty array");
+          }
+
+          const branchSelect = document.getElementById("branchSelect");
+          branchSelect.innerHTML = '<option value="">Select Branch</option>';
+
+          // Group branches by regulation
+          const branchesByRegulation = {};
+          branches.forEach((branch) => {
+            if (!branchesByRegulation[branch.regulation_name]) {
+              branchesByRegulation[branch.regulation_name] = [];
+            }
+            branchesByRegulation[branch.regulation_name].push(branch);
+          });
+
+          // Add branches grouped by regulation
+          Object.keys(branchesByRegulation)
+            .sort()
+            .forEach((regulationName) => {
+              const optgroup = document.createElement("optgroup");
+              optgroup.label = regulationName;
+
+              branchesByRegulation[regulationName].forEach((branch) => {
+                const option = document.createElement("option");
+                option.value = branch.code;
+                option.textContent = branch.name;
+                option.setAttribute("data-regulation", regulationName);
+                optgroup.appendChild(option);
+              });
+
+              branchSelect.appendChild(optgroup);
+            });
+        } catch (error) {
+          console.warn("Using fallback branches due to error or empty database:", error.message);
+
+          const branchSelect = document.getElementById("branchSelect");
+
+          // UPDATED: Your custom list of branches
+          branchSelect.innerHTML = `
+            <option value="">Select Branch</option>
+            <option value="CIVIL">Civil</option>
+            <option value="CSE">CSE</option>
+            <option value="AIML">CSE (AI&ML)</option>
+            <option value="AIDS">AI&DS</option>
+            <option value="DS">CSE (Data Science)</option>
+            <option value="CS">CSE (Cyber Security)</option>
+            <option value="ECE">ECE</option>
+            <option value="EEE">EEE</option>
+            <option value="ME">Mechanical</option>
+            <option value="SH">S&H</option>
+          `;
+        }
+      }
+
+      document
+        .getElementById("registrationForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          const formData = new FormData(this);
+          const rollNumber = this.rollNumber.value.trim();
+          const password = this.password.value;
+          const confirmPassword = this.confirmPassword.value;
+
+          document
+            .querySelectorAll(".error-message")
+            .forEach((el) => el.remove());
+
+          const requiredFields = ["fullName", "rollNumber", "email", "phone"];
+          let isValid = true;
+          requiredFields.forEach((field) => {
+            const input = this[field];
+            if (!input || !input.value.trim()) {
+              if (input) Validator.showError(input, "This field is required");
+              isValid = false;
+            }
+          });
+
+          if (!this.password.value) {
+            Validator.showError(this.password, "Password is required");
+            isValid = false;
+          } else if (this.password.value.length < 6) {
+            Validator.showError(
+              this.password,
+              "Password must be at least 6 characters",
+            );
+            isValid = false;
+          }
+          if (password !== confirmPassword) {
+            Validator.showError(this.confirmPassword, "Passwords do not match");
+            isValid = false;
+          }
+          if (!Validator.validateRollNumber(rollNumber)) {
+            Validator.showError(
+              this.rollNumber,
+              "Invalid format. Use: 222U1A0522 (year+2U1A+branch+number)",
+            );
+            isValid = false;
+          }
+
+          if (!isValid) {
+            Notification.show("Please fix the errors below", "error");
+            return;
+          }
+
+          Utils.showLoading();
+          try {
+            const branchSelect = this.branch;
+            const branchValue =
+              branchSelect.options[branchSelect.selectedIndex].value;
+            const selectedOption =
+              branchSelect.options[branchSelect.selectedIndex];
+            const regulationName =
+              selectedOption.getAttribute("data-regulation");
+
+            // Find regulation ID from regulation name
+            let regulationId = null;
+            if (regulationName) {
+              // Map regulation names to IDs
+              const regulationMap = {
+                "R20 Regulation": "r20",
+                "R22 Regulation": "r22",
+                "R23 Regulation": "r23",
+              };
+              regulationId = regulationMap[regulationName] || null;
+            }
+
+            const res = await fetch("/api/students/register", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                rollNo: rollNumber,
+                password: password,
+                name: this.fullName.value.trim(),
+                department: branchValue,
+                year: this.year.value,
+                regulationId: regulationId,
+              }),
+            });
+            const data = await res.json().catch(() => ({}));
+            Utils.hideLoading();
+            if (!res.ok) {
+              const errMsg = data.error || "Registration failed";
+              Notification.show(errMsg, "error");
+              if (
+                this.rollNumber &&
+                (errMsg.includes("roll number") ||
+                  errMsg.includes("Roll number"))
+              ) {
+                Validator.showError(this.rollNumber, errMsg);
+              }
+              return;
+            }
+            Notification.show(
+              "Registration successful! You can now login with your roll number and password.",
+              "success",
+            );
+            setTimeout(() => {
+              window.location.href = "student-login.html";
+            }, 1500);
+          } catch (err) {
+            Utils.hideLoading();
+            Notification.show("Network error. Please try again.", "error");
+          }
+        });
+
+      // Clear errors on input
+      document.querySelectorAll(".form-input").forEach((input) => {
+        input.addEventListener("input", function () {
+          Validator.clearError(this);
+        });
+      });
+    </script>
+  </body>
+</html>

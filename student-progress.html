@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic Progress - GIST Mentoring System</title>
+    <link rel="icon" type="image/svg+xml" href="assets/gist-logo.svg">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar py-6">
+        <div class="container mx-auto px-6 flex items-center justify-between">
+            <div class="text-xl font-semibold flex items-center gap-3 navbar-brand">
+                <img src="assets/gist-logo.svg" alt="GIST Nellore" class="brand-logo">
+                <span>GIST Mentoring System</span>
+            </div>
+            <div class="hidden md:flex items-center gap-4">
+                <a href="student-dashboard.html" class="font-medium">Dashboard</a>
+                <a href="#" onclick="Auth.logout(); return false;" class="font-medium">Logout</a>
+            </div>
+            <div class="mobile-only-nav">
+                <a href="student-dashboard.html">Dashboard</a>
+                <a href="#" onclick="Auth.logout(); return false;">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Student tabs for quick navigation -->
+    <div class="container mx-auto px-6 max-w-7xl">
+        <div class="tab-nav">
+            <a href="student-dashboard.html" class="tab-link">Dashboard</a>
+            <a href="student-progress.html" class="tab-link active">Progress</a>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-6 py-12 max-w-7xl">
+        <!-- Header -->
+        <div class="gradient-primary text-gray-800 p-8 rounded-2xl mb-8 card">
+            <h1 class="h1 mb-2 text-center">Academic Progress Tracker</h1>
+            <p class="text-base text-center opacity-90">Comprehensive view of your academic performance</p>
+        </div>
+
+        <!-- Performance Analytics -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+            <div class="card p-6 text-center">
+                <div class="text-sm text-gray-600 mb-2">Current CGPA</div>
+                <div class="text-3xl font-bold text-primary" id="displayCGPA">8.34</div>
+                <div class="text-xs text-gray-500 mt-1">Overall Performance</div>
+            </div>
+            <div class="card p-6 text-center">
+                <div class="text-sm text-gray-600 mb-2">Semesters Completed</div>
+                <div class="text-3xl font-bold text-primary" id="completedSemesters">3</div>
+                <div class="text-xs text-gray-500 mt-1">Out of 8</div>
+            </div>
+            <div class="card p-6 text-center">
+                <div class="text-sm text-gray-600 mb-2">Total Credits</div>
+                <div class="text-3xl font-bold text-primary" id="totalCredits">54</div>
+                <div class="text-xs text-gray-500 mt-1">Credits Earned</div>
+            </div>
+            <div class="card p-6 text-center">
+                <div class="text-sm text-gray-600 mb-2">Performance Trend</div>
+                <div class="text-3xl font-bold text-green-600">📈</div>
+                <div class="text-xs text-gray-500 mt-1">Improving</div>
+            </div>
+        </div>
+
+        <!-- Performance Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- SGPA Trend -->
+            <div class="card p-6">
+                <div class="card-header">
+                    <span class="text-2xl">📊</span>
+                    <h2 class="h3 text-gist-navy">SGPA Trend</h2>
+                </div>
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="sgpaTrendChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Grade Distribution -->
+            <div class="card p-6">
+                <div class="card-header">
+                    <span class="text-2xl">🎯</span>
+                    <h2 class="h3 text-gist-navy">Grade Distribution</h2>
+                </div>
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="gradeDistributionChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subject Performance Analysis -->
+        <div class="card p-6 mb-8">
+            <div class="card-header">
+                <span class="text-2xl">📚</span>
+                <h2 class="h3 text-gist-navy">Subject Performance Analysis</h2>
+            </div>
+            <div id="subjectAnalysis" class="mt-4">
+                <!-- Will be populated dynamically -->
+            </div>
+        </div>
+
+        <!-- Detailed Semester Records -->
+        <div class="card p-6 mb-8">
+            <div class="card-header">
+                <span class="text-2xl">📖</span>
+                <h2 class="h3 text-gist-navy">Semester-wise Detailed Records</h2>
+            </div>
+            <div id="progressSemesterFilterBar" class="flex flex-wrap gap-2 mt-4 mb-4">
+                <!-- semester buttons -->
+            </div>
+            <div class="chart-container mb-6" style="height: 260px;">
+                <canvas id="progressSemesterGradeChart"></canvas>
+            </div>
+            <div id="detailedRecords" class="mt-4 space-y-6">
+                <!-- Will be populated dynamically -->
+            </div>
+        </div>
+
+        <!-- Download Report Button -->
+        <div class="page-actions">
+            <button onclick="printReport()" class="btn">
+                📄 Print Academic Report
+            </button>
+            <button onclick="exportData()" class="btn-secondary">
+                💾 Export as PDF
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Check authentication
+        if (!Auth.requireAuth('student')) {
+            // Will redirect if not authenticated
+        } else {
+            loadProgressData();
+        }
+
+        let allProgressRecords = [];
+        let progressSelectedSemester = 'all';
+        let sgpaTrendChart = null;
+        let gradeDistributionChart = null;
+        let progressSemesterGradeChart = null;
+
+        async function loadProgressData() {
+            // Refresh user from backend when available
+            let user = await Auth.refreshMe();
+            const progress = await Auth.getStudentProgress();
+            const records = progress.academicRecords || [];
+
+            if (!records || records.length === 0) {
+                document.getElementById('detailedRecords').innerHTML = `
+                    <div class="text-center py-12 text-gray-500">
+                        <div class="text-5xl mb-4">📚</div>
+                        <p class="text-lg">No academic records available yet.</p>
+                        <p class="text-sm">Contact your department to update your records.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Update stats
+            document.getElementById('displayCGPA').textContent = progress.cgpa ?? user?.cgpa ?? '-';
+            document.getElementById('completedSemesters').textContent = records.length;
+
+            const totalCredits = records.reduce((sum, sem) =>
+                sum + sem.subjects.reduce((s, sub) => s + sub.credits, 0), 0);
+            document.getElementById('totalCredits').textContent = totalCredits;
+
+            // Render charts
+            renderSGPATrend(records);
+            renderGradeDistribution(records);
+            renderSubjectAnalysis(records);
+            allProgressRecords = records;
+            renderProgressSemesterButtons(records);
+            renderDetailedRecords(records, progressSelectedSemester);
+            renderProgressSemesterGradeChart(records, progressSelectedSemester);
+        }
+        function renderSGPATrend(records) {
+            const ctx = document.getElementById('sgpaTrendChart').getContext('2d');
+            const labels = records.map(r => `Sem ${r.semester}`);
+            const data = records.map(r => r.sgpa);
+
+            if (sgpaTrendChart) sgpaTrendChart.destroy();
+            sgpaTrendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'SGPA',
+                        data: data,
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        borderWidth: 3,
+                        pointRadius: 6,
+                        pointBackgroundColor: '#2563eb',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 0,
+                            max: 10,
+                            ticks: {
+                                color: '#4b5563',
+                                font: { family: 'Inter', weight: '500' }
+                            },
+                            grid: { color: 'rgba(229, 231, 235, 1)' }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#4b5563',
+                                font: { family: 'Inter', weight: '500' }
+                            },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderGradeDistribution(records) {
+            const ctx = document.getElementById('gradeDistributionChart').getContext('2d');
+            
+            // Count grades
+            const gradeCounts = {};
+            records.forEach(sem => {
+                sem.subjects.forEach(sub => {
+                    gradeCounts[sub.grade] = (gradeCounts[sub.grade] || 0) + 1;
+                });
+            });
+
+            const labels = Object.keys(gradeCounts).sort();
+            const data = labels.map(grade => gradeCounts[grade]);
+
+            if (gradeDistributionChart) gradeDistributionChart.destroy();
+            gradeDistributionChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Number of Subjects',
+                        data: data,
+                        backgroundColor: '#2563eb',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                color: '#4b5563',
+                                font: { family: 'Inter', weight: '500' }
+                            },
+                            grid: { color: 'rgba(229, 231, 235, 1)' }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#4b5563',
+                                font: { family: 'Inter', weight: '500' }
+                            },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderSubjectAnalysis(records) {
+            const container = document.getElementById('subjectAnalysis');
+            
+            // Calculate subject-wise averages
+            const subjectStats = {};
+            records.forEach(sem => {
+                sem.subjects.forEach(sub => {
+                    const key = sub.name;
+                    if (!subjectStats[key]) {
+                        subjectStats[key] = { marks: [], grades: [], credits: sub.credits };
+                    }
+                    subjectStats[key].marks.push(sub.marks);
+                    subjectStats[key].grades.push(sub.grade);
+                });
+            });
+
+            // Find best and worst performing subjects
+            const avgMarks = Object.entries(subjectStats).map(([name, data]) => ({
+                name,
+                avg: (data.marks.reduce((a, b) => a + b, 0) / data.marks.length).toFixed(1),
+                grade: data.grades[0]
+            }));
+
+            avgMarks.sort((a, b) => b.avg - a.avg);
+            const topSubjects = avgMarks.slice(0, 5);
+            const weakSubjects = avgMarks.slice(-3).reverse();
+
+            container.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="p-4 bg-green-50 rounded-lg">
+                        <h4 class="font-semibold text-green-800 mb-3">Top Performing Subjects</h4>
+                        <div class="space-y-2">
+                            ${topSubjects.map(sub => `
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-gray-700">${sub.name}</span>
+                                    <span class="font-semibold text-green-700">${sub.avg}%</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="p-4 bg-yellow-50 rounded-lg">
+                        <h4 class="font-semibold text-yellow-800 mb-3">Areas for Improvement</h4>
+                        <div class="space-y-2">
+                            ${weakSubjects.map(sub => `
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-gray-700">${sub.name}</span>
+                                    <span class="font-semibold text-yellow-700">${sub.avg}%</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderProgressSemesterButtons(records) {
+            const bar = document.getElementById('progressSemesterFilterBar');
+            const semesters = [...records]
+                .map(r => Number(r.semester))
+                .filter(Number.isFinite)
+                .sort((a, b) => a - b);
+
+            const allCls = progressSelectedSemester === 'all' ? 'btn' : 'btn-secondary';
+            let html = `<button type="button" class="${allCls}" onclick="filterProgressSemester('all')">All Semesters</button>`;
+            html += semesters.map((sem) => {
+                const cls = progressSelectedSemester === sem ? 'btn' : 'btn-secondary';
+                return `<button type="button" class="${cls}" onclick="filterProgressSemester(${sem})">Semester ${sem}</button>`;
+            }).join('');
+            bar.innerHTML = html;
+        }
+
+        function filterProgressSemester(sem) {
+            progressSelectedSemester = sem;
+            renderProgressSemesterButtons(allProgressRecords);
+            renderDetailedRecords(allProgressRecords, progressSelectedSemester);
+            renderProgressSemesterGradeChart(allProgressRecords, progressSelectedSemester);
+        }
+
+        function renderProgressSemesterGradeChart(records, semFilter = 'all') {
+            const ctx = document.getElementById('progressSemesterGradeChart').getContext('2d');
+            let labels = [];
+            let data = [];
+            let label = 'SGPA';
+
+            if (semFilter === 'all') {
+                const ordered = [...records].sort((a, b) => Number(a.semester) - Number(b.semester));
+                labels = ordered.map(r => `Sem ${r.semester}`);
+                data = ordered.map(r => Number(r.sgpa) || 0);
+                label = 'Semester SGPA';
+            } else {
+                const sem = records.find(r => Number(r.semester) === Number(semFilter));
+                const subjects = sem ? sem.subjects : [];
+                labels = subjects.map(s => s.code || s.name);
+                data = subjects.map(s => Number(s.points) || 0);
+                label = `Grade Points (Sem ${semFilter})`;
+            }
+
+            if (progressSemesterGradeChart) progressSemesterGradeChart.destroy();
+            progressSemesterGradeChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label,
+                        data,
+                        backgroundColor: '#2563eb',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10,
+                            ticks: {
+                                color: '#4b5563',
+                                font: { family: 'Inter', weight: '500' }
+                            },
+                            grid: { color: 'rgba(229, 231, 235, 1)' }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#4b5563',
+                                font: { family: 'Inter', weight: '500' }
+                            },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderDetailedRecords(records, semFilter = 'all') {
+            const container = document.getElementById('detailedRecords');
+            container.innerHTML = '';
+
+            const filtered = semFilter === 'all'
+                ? [...records].sort((a, b) => Number(a.semester) - Number(b.semester))
+                : records.filter(r => Number(r.semester) === Number(semFilter));
+
+            if (!filtered.length) {
+                container.innerHTML = `
+                    <div class="text-center py-8 bg-gray-50 rounded-lg text-gray-500">
+                        No records available for this semester.
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(semester => {
+                const totalCredits = semester.subjects.reduce((sum, sub) => sum + sub.credits, 0);
+                const totalPoints = semester.subjects.reduce((sum, sub) => sum + (sub.credits * sub.points), 0);
+                const avgMarks = (semester.subjects.reduce((sum, sub) => sum + sub.marks, 0) / semester.subjects.length).toFixed(1);
+
+                const semDiv = document.createElement('div');
+                semDiv.className = 'bg-gray-50 p-4 rounded-lg';
+                semDiv.innerHTML = `
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-navy">Semester ${semester.semester}</h3>
+                        <div class="flex gap-6 text-sm">
+                            <div><span class="text-gray-600">SGPA:</span> <span class="font-bold text-primary text-lg">${semester.sgpa}</span></div>
+                            <div><span class="text-gray-600">Credits:</span> <span class="font-semibold">${totalCredits}</span></div>
+                            <div><span class="text-gray-600">Avg:</span> <span class="font-semibold">${avgMarks}%</span></div>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="table-clean w-full">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Subject</th>
+                                    <th>Credits</th>
+                                    <th>Marks</th>
+                                    <th>Grade</th>
+                                    <th>Points</th>
+                                    <th>Credit×Points</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${semester.subjects.map(sub => `
+                                    <tr>
+                                        <td class="font-mono text-sm">${sub.code}</td>
+                                        <td>${sub.name}</td>
+                                        <td class="text-center">${sub.credits}</td>
+                                        <td class="text-center font-semibold">${sub.marks}</td>
+                                        <td class="text-center">
+                                            <span class="status-badge ${getGradeClass(sub.grade)}">${sub.grade}</span>
+                                        </td>
+                                        <td class="text-center font-semibold">${sub.points}</td>
+                                        <td class="text-center font-semibold text-primary">${sub.credits * sub.points}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                            <tfoot>
+                                <tr class="bg-gray-100 font-semibold">
+                                    <td colspan="2">Total</td>
+                                    <td class="text-center">${totalCredits}</td>
+                                    <td colspan="3" class="text-right">Total Credit Points:</td>
+                                    <td class="text-center text-primary">${totalPoints}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                `;
+                container.appendChild(semDiv);
+            });
+        }
+
+        function getGradeClass(grade) {
+            if (grade === 'A+' || grade === 'O') return 'status-completed';
+            if (grade === 'A') return 'status-completed';
+            if (grade === 'B+' || grade === 'B') return 'status-progress';
+            return 'status-pending';
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        function exportData() {
+            Notification.show('PDF export feature coming soon!', 'info');
+        }
+    </script>
+</body>
+</html>

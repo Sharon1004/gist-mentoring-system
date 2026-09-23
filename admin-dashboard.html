@@ -1,0 +1,2074 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard - GIST Mentoring System</title>
+    <link rel="icon" type="image/svg+xml" href="assets/gist-logo.svg" />
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <!-- Add this bridge so the autotable plugin can find jsPDF -->
+    <script src="app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar py-6">
+      <div class="container mx-auto px-6 flex items-center justify-between">
+        <div class="text-xl font-semibold flex items-center gap-3 navbar-brand">
+          <img
+            src="assets/gist-logo.svg"
+            alt="GIST Nellore"
+            class="brand-logo"
+          />
+          <span
+            >GIST Mentoring System
+            <span class="hidden sm:inline">- Admin Portal</span></span
+          >
+        </div>
+        <div class="hidden md:flex items-center gap-4">
+          <span class="text-sm text-gray-600" id="adminName"></span>
+          <span
+            class="text-xs px-2 py-1 rounded-full bg-primary/20 text-primary"
+            id="adminRole"
+          ></span>
+          <a
+            href="#"
+            onclick="
+              Auth.logout();
+              return false;
+            "
+            class="font-medium"
+            >Logout</a
+          >
+        </div>
+        <div class="mobile-only-nav">
+          <span id="adminNameMobile">Admin</span>
+          <a
+            href="#"
+            onclick="
+              Auth.logout();
+              return false;
+            "
+            >Logout</a
+          >
+        </div>
+      </div>
+    </nav>
+
+    <div class="container mx-auto px-6 py-12 max-w-7xl">
+      <!-- Admin Header -->
+      <div class="gradient-primary text-gray-800 p-8 rounded-2xl mb-8 card">
+        <div
+          class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6"
+        >
+          <div>
+            <h1 class="h1 mb-3">Admin Dashboard</h1>
+            <p class="text-lg opacity-95">
+              Complete Student Records Management
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick jump navigation -->
+      <nav
+        class=" navbar quick-jump mb-6 flex flex-wrap gap-2 p-3 bg-gray-100 rounded-xl"
+      >
+        <span class="text-sm font-semibold text-gray-600 mr-2 self-center"
+          >Quick jump:</span
+        >
+        <a href="#section-stats" class="quick-jump-link">Stats</a>
+        <a href="#section-analytics" class="quick-jump-link">Analytics</a>
+        <a href="#section-mentors" class="quick-jump-link">Mentors</a>
+        <a href="#section-toppers" class="quick-jump-link">Toppers</a>
+        <a href="#section-regulations" class="quick-jump-link">Regulations</a>
+      </nav>
+
+      <!-- Statistics Overview -->
+      <div
+        id="section-stats"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8 scroll-mt-6"
+      >
+        <div class="card p-6 text-center">
+          <div class="text-sm text-gray-600 mb-2">Total Students</div>
+          <div class="text-3xl font-bold text-primary" id="totalStudents">
+            0
+          </div>
+          <div class="text-xs text-gray-500 mt-1">Enrolled</div>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="text-sm text-gray-600 mb-2">Departments</div>
+          <div class="text-3xl font-bold text-primary" id="totalDepts">5</div>
+          <div class="text-xs text-gray-500 mt-1">Active Branches</div>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="text-sm text-gray-600 mb-2">Average CGPA</div>
+          <div class="text-3xl font-bold text-primary" id="avgCGPA">-</div>
+          <div class="text-xs text-gray-500 mt-1">College Average</div>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="text-sm text-gray-600 mb-2">Active Mentors</div>
+          <div class="text-3xl font-bold text-primary" id="totalMentors">0</div>
+          <div class="text-xs text-gray-500 mt-1">Faculty</div>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="text-sm text-gray-600 mb-2">Total Records</div>
+          <div class="text-3xl font-bold text-primary" id="totalRecords">0</div>
+          <div class="text-xs text-gray-500 mt-1">Semesters Data</div>
+        </div>
+      </div>
+
+      <!-- Analytics -->
+      <div id="section-analytics" class="card p-6 mb-8 scroll-mt-6">
+        <div class="card-header">
+          <span class="text-2xl">📊</span>
+          <h2 class="h3 text-gist-navy">Analytics</h2>
+        </div>
+
+        <!-- a. Year-wise Performance -->
+        <div class="mb-8">
+          <h3 class="font-semibold text-navy mb-4">Year-wise Performance</h3>
+          <div id="yearStats" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="text-sm text-gray-500">Loading year statistics…</div>
+          </div>
+        </div>
+
+        <!-- b. Semester-wise Performance Summary
+        <div class="mb-8">
+          <h3 class="font-semibold text-navy mb-4">
+            Semester-wise Performance Summary
+          </h3>
+          <div id="semesterSummary">
+            <div class="text-sm text-gray-500">
+              Loading semester statistics…
+            </div>
+          </div>
+        </div> -->
+
+        <!-- c. Department-wise Performance -->
+        <div>
+          <h3 class="font-semibold text-navy mb-4">
+            Department-wise Performance
+          </h3>
+          <div
+            id="departmentStats"
+            class="grid grid-cols-1 sm:grid-cols-2 gap-4"
+          >
+            <div class="text-sm text-gray-500">
+              Loading department statistics…
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mentor Management -->
+       <!-- Mentor Management -->
+<div id="section-mentors" class="card p-6 mb-8 scroll-mt-6">
+
+  <div class="card-header">
+    <span class="text-2xl">🧑‍🏫</span>
+    <h2 class="h3 text-gist-navy">Manage Mentors</h2>
+  </div>
+
+  <!-- Create Mentor -->
+  <div class="bg-gray-50 p-6 rounded-lg mb-6">
+
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <h3 class="font-semibold text-navy">Create Mentor</h3>
+        <p class="text-sm text-gray-500 mt-1">
+          Add a new faculty mentor to the system
+        </p>
+      </div>
+    </div>
+
+    <form id="createMentorForm">
+
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+
+        <div class="form-group">
+          <label class="form-label">Mentor ID</label>
+          <input
+            id="mentorId"
+            class="form-input"
+            placeholder="e.g., mentor6"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Name</label>
+          <input
+            id="mentorNameInput"
+            class="form-input"
+            placeholder="e.g., Dr. Suresh"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Department</label>
+          <select id="mentorDept" class="form-input" required>
+            <option value="">Select Department</option>
+            <option value="CSE">CSE</option>
+            <option value="ECE">ECE</option>
+            <option value="EEE">EEE</option>
+            <option value="MECH">MECH</option>
+            <option value="CIVIL">CIVIL</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input
+            id="mentorPassword"
+            type="password"
+            class="form-input"
+            placeholder="Set a password"
+            required
+          />
+        </div>
+
+      </div>
+
+      <div class="flex items-center justify-between mt-5">
+
+        <div class="text-xs text-gray-500">
+          Mentor creation requires backend login as admin.
+        </div>
+
+        <button class="btn" type="submit">
+          Create Mentor
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+
+  <!-- Existing Mentors -->
+  <div class="bg-gray-50 p-6 rounded-lg">
+
+    <div class="flex items-center justify-between mb-5">
+      <div>
+        <h3 class="font-semibold text-navy">
+          Existing Mentors
+        </h3>
+
+        <p class="text-sm text-gray-500 mt-1">
+          View and manage all faculty mentors
+        </p>
+      </div>
+    </div>
+
+    <div class="w-full">
+
+      <table class="table-clean w-full">
+
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Dept</th>
+            <th>Students</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody id="mentorsTableBody"></tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+
+  <!-- Mentor Details View -->
+  <div
+    id="mentorDetailView"
+    class="bg-white p-6 rounded-lg border border-gray-200 mt-6"
+    style="display: none"
+  >
+
+    <div class="flex items-center justify-between mb-6">
+
+      <div>
+        <h3
+          class="text-xl font-bold text-navy"
+          id="mentorDetailName"
+        >
+          Mentor Details
+        </h3>
+
+        <p
+          class="text-sm text-gray-600 mt-1"
+          id="mentorDetailInfo"
+        ></p>
+      </div>
+
+      <button
+        type="button"
+        class="btn-secondary"
+        onclick="closeMentorDetails()"
+      >
+        ✕ Close
+      </button>
+
+    </div>
+
+
+    <!-- Mentor Summary -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+
+      <div class="bg-blue-50 p-4 rounded-lg text-center">
+        <div class="text-sm text-gray-600">
+          Mentor ID
+        </div>
+
+        <div
+          class="text-lg font-bold text-navy font-mono"
+          id="mentorDetailId"
+        >
+          -
+        </div>
+      </div>
+
+
+      <div class="bg-purple-50 p-4 rounded-lg text-center">
+        <div class="text-sm text-gray-600">
+          Department
+        </div>
+
+        <div
+          class="text-lg font-bold text-navy"
+          id="mentorDetailDepartment"
+        >
+          -
+        </div>
+      </div>
+
+
+      <div class="bg-green-50 p-4 rounded-lg text-center">
+        <div class="text-sm text-gray-600">
+          Total Students
+        </div>
+
+        <div
+          class="text-2xl font-bold text-primary"
+          id="mentorDetailStudentCount"
+        >
+          0
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- Students Assigned to Mentor -->
+    <div>
+
+      <h4 class="font-semibold text-navy mb-4">
+        Students Assigned to This Mentor
+      </h4>
+
+      <div class="w-full overflow-x-auto">
+
+        <table class="table-clean w-full">
+
+          <thead>
+            <tr>
+              <th>Roll No</th>
+              <th>Name</th>
+              <th>Department</th>
+              <th>Year</th>
+              <th>CGPA</th>
+              <th>Backlogs</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody id="mentorStudentsTableBody"></tbody>
+
+        </table>
+
+      </div>
+
+      <div
+        id="noMentorStudents"
+        class="text-center text-gray-500 py-6"
+        style="display: none"
+      >
+        No students are currently assigned to this mentor.
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+      <!-- Top & Bottom Performers -->
+      <div
+        id="section-toppers"
+        class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 scroll-mt-6"
+      >
+        <div class="card p-6">
+          <div class="card-header">
+            <span class="text-2xl">🏆</span>
+            <h2 class="h3 text-gist-navy">Year-wise Toppers</h2>
+          </div>
+          <div id="yearWiseToppers" class="mt-4 space-y-3">
+            <!-- Will be populated dynamically -->
+          </div>
+        </div>
+        <div class="card p-6">
+          <div class="card-header">
+            <span class="text-2xl">🎯</span>
+            <h2 class="h3 text-gist-navy">Department-wise Toppers</h2>
+          </div>
+          <div id="deptWiseToppers" class="mt-4 space-y-3">
+            <!-- Will be populated dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <!-- All Students Data Table -->
+      <div id="section-students" class="card p-6 mb-8 scroll-mt-6">
+        <div class="card-header">
+          <span class="text-2xl">👥</span>
+          <h2 class="h3 text-gist-navy">All Students Overview</h2>
+          <button onclick="exportAllData()" class="btn-secondary ml-auto">
+            📥 Export All Data
+          </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div class="form-group">
+            <label class="form-label">Search</label>
+            <input
+              type="text"
+              id="searchInput"
+              class="form-input"
+              placeholder="Search by name or roll no..."
+              onkeyup="filterStudents()"
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Department</label>
+            <select
+              id="deptFilter"
+              class="form-input"
+              onchange="filterStudents()"
+            >
+              <option value="">All Departments</option>
+              <option value="CSE">CSE</option>
+              <option value="ECE">ECE</option>
+              <option value="EEE">EEE</option>
+              <option value="MECH">MECH</option>
+              <option value="CIVIL">CIVIL</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Year</label>
+            <select
+              id="yearFilter"
+              class="form-input"
+              onchange="filterStudents()"
+            >
+              <option value="">All Years</option>
+              <option value="I">I B.Tech</option>
+              <option value="II">II B.Tech</option>
+              <option value="III">III B.Tech</option>
+              <option value="IV">IV B.Tech</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">CGPA Range</label>
+            <select
+              id="cgpaFilter"
+              class="form-input"
+              onchange="filterStudents()"
+            >
+              <option value="">All</option>
+              <option value="9-10">9.0 - 10.0 (Excellent)</option>
+              <option value="8-9">8.0 - 8.9 (Very Good)</option>
+              <option value="7-8">7.0 - 7.9 (Good)</option>
+              <option value="0-7">Below 7.0 (Need Support)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="table-clean w-full">
+            <thead>
+              <tr>
+                <th>Roll No</th>
+                <th>Name</th>
+                <th>Department</th>
+                <th>Year</th>
+                <th>CGPA</th>
+                <th>Mentor</th>
+                <th>Semesters</th>
+                <th>Credits</th>
+                <th>Performance</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="studentsTableBody">
+              <!-- Will be populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+        <div class="mt-4 text-sm text-gray-600">
+          Showing <span id="showingCount" class="font-semibold">0</span> of
+          <span id="totalCount" class="font-semibold">0</span> students
+        </div>
+      </div>
+
+      <!-- Detailed Student View (Hidden by default) -->
+      <div id="studentDetailView" class="card p-6 mb-8" style="display: none">
+        <div class="card-header">
+          <span class="text-2xl">📋</span>
+          <h2 class="h3 text-gist-navy">Complete Student Record</h2>
+          <button onclick="closeStudentDetail()" class="btn-secondary ml-auto">
+            ✕ Close
+          </button>
+        </div>
+
+        <!-- Student Info -->
+        <div
+          class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg mb-6"
+        >
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div>
+              <div class="text-sm text-gray-600 mb-1">Student Name</div>
+              <div class="text-xl font-bold text-navy" id="detailName">-</div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-600 mb-1">Roll Number</div>
+              <div
+                class="text-xl font-bold text-navy font-mono"
+                id="detailRoll"
+              >
+                -
+              </div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-600 mb-1">Department</div>
+              <div class="text-xl font-bold text-navy" id="detailDept">-</div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-600 mb-1">Academic Year</div>
+              <div class="text-xl font-bold text-navy" id="detailYear">-</div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-600 mb-1">Current CGPA</div>
+              <div class="text-xl font-bold text-primary" id="detailCGPA">
+                -
+              </div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-600 mb-1">Assigned Mentor</div>
+              <div class="text-xl font-bold text-navy" id="detailMentor">-</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div class="bg-green-50 p-4 rounded-lg text-center">
+            <div class="text-xs text-gray-600 mb-1">Total Credits</div>
+            <div class="text-2xl font-bold text-green-700" id="detailCredits">
+              -
+            </div>
+          </div>
+          <div class="bg-blue-50 p-4 rounded-lg text-center">
+            <div class="text-xs text-gray-600 mb-1">Avg Marks</div>
+            <div class="text-2xl font-bold text-blue-700" id="detailAvgMarks">
+              -
+            </div>
+          </div>
+          <div class="bg-purple-50 p-4 rounded-lg text-center">
+            <div class="text-xs text-gray-600 mb-1">Semesters</div>
+            <div
+              class="text-2xl font-bold text-purple-700"
+              id="detailSemesters"
+            >
+              -
+            </div>
+          </div>
+          <div class="bg-yellow-50 p-4 rounded-lg text-center">
+            <div class="text-xs text-gray-600 mb-1">Performance</div>
+            <div class="text-2xl font-bold text-yellow-700" id="detailTrend">
+              -
+            </div>
+          </div>
+        </div>
+
+        <!-- SGPA Progress Chart -->
+        <div class="mb-6">
+          <h4 class="font-semibold text-gray-800 mb-3">SGPA Progression</h4>
+          <div class="chart-container" style="height: 250px">
+            <canvas id="adminStudentSGPAChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Complete Academic Records -->
+        <div id="detailAcademicRecords">
+          <!-- Will be populated dynamically -->
+        </div>
+      </div>
+
+      <!-- Mentor-wise Analysis -->
+      <div class="card p-6 mb-8">
+        <div class="card-header">
+          <span class="text-2xl">👨‍🏫</span>
+          <h2 class="h3 text-gist-navy">Mentor-wise Student Performance</h2>
+        </div>
+        <div id="mentorStats" class="mt-4">
+          <!-- Will be populated dynamically -->
+        </div>
+      </div>
+
+      <!-- Top & Bottom Performers -->
+      <div
+        id="section-performers"
+        class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 scroll-mt-6"
+      >
+        <div class="card p-6">
+          <div class="card-header">
+            <span class="text-2xl">🏆</span>
+            <h2 class="h3 text-gist-navy">Top Performers</h2>
+          </div>
+          <div id="topPerformers" class="mt-4 space-y-3">
+            <!-- Will be populated dynamically -->
+          </div>
+        </div>
+        <div class="card p-6">
+          <div class="card-header">
+            <span class="text-2xl">⚠️</span>
+            <h2 class="h3 text-gist-navy">Students Needing Support</h2>
+          </div>
+          <div
+            id="needSupport"
+            class="mt-4 space-y-3"
+            style="max-height: 480px; overflow-y: auto"
+          >
+            <!-- Will be populated dynamically -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Regulations Management -->
+      <div id="section-regulations" class="card p-6 mb-8 scroll-mt-6">
+        <div class="card-header">
+          <span class="text-2xl">📋</span>
+          <h2 class="h3 text-gist-navy">Regulations Management</h2>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="bg-gray-50 p-6 rounded-lg">
+            <h3 class="font-semibold text-navy mb-4">Create Regulation</h3>
+            <form id="createRegulationForm" class="space-y-4">
+              <div class="form-group">
+                <label class="form-label">Regulation ID</label>
+                <input
+                  id="regulationId"
+                  class="form-input"
+                  placeholder="e.g., r24"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Name</label>
+                <input
+                  id="regulationName"
+                  class="form-input"
+                  placeholder="e.g., R24 Regulation"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea
+                  id="regulationDesc"
+                  class="form-input"
+                  rows="3"
+                  placeholder="Description of the regulation"
+                ></textarea>
+              </div>
+              <div class="flex gap-3">
+    <button id="regulationSubmitBtn" class="btn" type="submit">
+        Create Regulation
+    </button>
+
+    <button
+        id="cancelRegulationEditBtn"
+        class="btn-secondary hidden"
+        type="button"
+        onclick="cancelRegulationEdit()"
+    >
+        Cancel
+    </button>
+</div>
+            </form>
+          </div>
+
+          <div class="bg-gray-50 p-6 rounded-lg">
+            <h3 class="font-semibold text-navy mb-4">Existing Regulations</h3>
+            <div id="regulationsList" class="space-y-3">
+              <!-- Will be populated dynamically -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let currentDetailChart = null;
+      let allStudentsData = [];
+      let cachedMentors = [];
+
+      // Check authentication
+      if (!Auth.requireAuth("admin")) {
+        // Will redirect if not authenticated
+      } else {
+        const user = Auth.getCurrentUser();
+        document.getElementById("adminName").textContent = user.name;
+        document.getElementById("adminNameMobile").textContent = user.name;
+        const roleEl = document.getElementById("adminRole");
+        roleEl.textContent =
+          user.role === "super_admin"
+            ? "Super Admin"
+            : user.branch
+              ? user.branch + " Admin"
+              : "Admin";
+        loadAdminData();
+      }
+
+      async function loadAdminData() {
+        // Get all students from backend
+        let students = [];
+        let mentors = [];
+        try {
+          students = await Auth.adminGetStudents();
+        } catch (e) {
+          Notification.show(e.message || "Failed to load students", "error");
+          students = [];
+        }
+
+        try {
+          mentors = await Auth.adminGetMentors();
+        } catch (e) {
+          Notification.show(e.message || "Failed to load mentors", "error");
+          mentors = [];
+        }
+
+        // Store for filtering
+        allStudentsData = students;
+await loadToppers();
+await loadRegulations();
+
+        // Calculate statistics
+        const totalStudents = students.length;
+        const validCgpas = students
+          .map((s) => Number(s.cgpa))
+          .filter((cgpa) => !Number.isNaN(cgpa) && cgpa > 0);
+        const avgCGPA =
+          validCgpas.length > 0
+            ? (
+                validCgpas.reduce((sum, cgpa) => sum + cgpa, 0) /
+                validCgpas.length
+              ).toFixed(2)
+            : "-";
+        const totalRecords = students.reduce((sum, s) => {
+          return sum + (s.academicRecords ? s.academicRecords.length : 0);
+        }, 0);
+        const totalMentors = mentors.length;
+        const totalDepts = new Set(students.map((s) => s.department)).size;
+
+        document.getElementById("totalStudents").textContent = totalStudents;
+        document.getElementById("avgCGPA").textContent = avgCGPA;
+        document.getElementById("totalRecords").textContent = totalRecords;
+        document.getElementById("totalMentors").textContent = totalMentors;
+        document.getElementById("totalDepts").textContent = totalDepts;
+
+        // a. Year-wise performance
+        safeRun("year stats", () => populateYearStats(students));
+
+        // b. Semester-wise performance summary
+        safeRun("semester summary", () => populateSemesterSummary(students));
+
+        // c. Department-wise performance
+        safeRun("department stats", () => populateDepartmentStats(students));
+
+        // Populate students table
+        safeRun("students table", () => populateStudentsTable(students));
+
+        // Populate top/bottom performers
+        safeRun("top/bottom performers", () => populatePerformers(students));
+
+        // Populate mentor-wise stats
+        safeRun("mentor-wise stats", () => populateMentorStats(students));
+
+        // Mentor management
+        cachedMentors = mentors;
+        safeRun("mentors table", () => renderMentorsTable(mentors));
+      }
+
+      // Run a dashboard-section renderer without letting one bad section
+      // (missing data, a null element, etc.) abort the ones after it.
+      function safeRun(label, fn) {
+        try {
+          fn();
+        } catch (e) {
+          console.error(`Admin dashboard section failed: ${label}`, e);
+        }
+      }
+
+      async function loadMentorsUI() {
+        try {
+          cachedMentors = await Auth.adminGetMentors();
+          renderMentorsTable(cachedMentors);
+        } catch (e) {
+          Notification.show(e.message || "Failed to load mentors", "error");
+        }
+      }
+      function renderMentorsTable(mentors) {
+  const tbody = document.getElementById("mentorsTableBody");
+  tbody.innerHTML = "";
+
+  mentors.forEach((m) => {
+    const mentorStudents = allStudentsData.filter(
+      (student) => student.mentor === m.name || student.mentor === m.id
+    );
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td class="font-mono text-sm">${m.id}</td>
+      <td class="font-medium">${m.name}</td>
+      <td>${m.department || "-"}</td>
+      <td class="text-center">${mentorStudents.length}</td>
+      <td>
+        <div class="flex flex-wrap gap-2">
+          <button
+            class="table-action-btn primary"
+            onclick="viewMentorDetails('${m.id}')"
+          >
+            View Details
+          </button>
+
+          <button
+            class="table-action-btn secondary"
+            onclick="deleteMentor('${m.id}')"
+          >
+            Remove
+          </button>
+        </div>
+      </td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+}
+function viewMentorDetails(mentorId) {
+  const mentor = cachedMentors.find(
+    (m) => String(m.id) === String(mentorId)
+  );
+
+  if (!mentor) {
+    Notification.show("Mentor not found", "error");
+    return;
+  }
+
+  // Find all students assigned to this mentor
+  const mentorStudents = allStudentsData.filter(
+    (student) =>
+      student.mentor === mentor.name ||
+      student.mentor === mentor.id
+  );
+
+  // Populate mentor information
+  document.getElementById("mentorDetailName").textContent =
+    mentor.name;
+
+  document.getElementById("mentorDetailInfo").textContent =
+    `${mentor.department || "No Department"} • ${mentorStudents.length} student(s)`;
+
+  document.getElementById("mentorDetailId").textContent =
+    mentor.id;
+
+  document.getElementById("mentorDetailDepartment").textContent =
+    mentor.department || "-";
+
+  document.getElementById("mentorDetailStudentCount").textContent =
+    mentorStudents.length;
+
+  const tbody = document.getElementById("mentorStudentsTableBody");
+  const noStudents = document.getElementById("noMentorStudents");
+
+  tbody.innerHTML = "";
+
+  if (mentorStudents.length === 0) {
+    noStudents.style.display = "block";
+    tbody.parentElement.style.display = "none";
+  } else {
+    noStudents.style.display = "none";
+    tbody.parentElement.style.display = "";
+
+    mentorStudents.forEach((student) => {
+      const backlogs = getBacklogCount(student);
+
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td class="font-mono text-sm">
+          ${student.rollNo || "-"}
+        </td>
+
+        <td class="font-medium">
+          ${student.name || "-"}
+        </td>
+
+        <td>
+          ${student.department || "-"}
+        </td>
+
+        <td>
+          ${student.year || "-"}
+        </td>
+
+        <td class="font-bold text-primary">
+          ${student.cgpa ?? "-"}
+        </td>
+
+        <td class="text-center">
+          <span class="${
+            backlogs > 0
+              ? "status-badge status-pending"
+              : "status-badge status-completed"
+          }">
+            ${backlogs}
+          </span>
+        </td>
+
+        <td>
+          <button
+            class="table-action-btn primary"
+            onclick='viewStudentDetail("${student.rollNo}")'
+          >
+            View Student
+          </button>
+        </td>
+      `;
+
+      tbody.appendChild(row);
+    });
+  }
+
+  // Show mentor details
+  const detailView = document.getElementById("mentorDetailView");
+  detailView.style.display = "block";
+
+  // Scroll to mentor details
+  detailView.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+}
+function closeMentorDetails() {
+  document.getElementById("mentorDetailView").style.display = "none";
+}
+      async function deleteMentor(id) {
+        if (
+          !confirm(
+            `Remove mentor "${id}"? Students assigned will be unassigned.`,
+          )
+        )
+          return;
+        try {
+          await Auth.adminDeleteMentor(id);
+          Notification.show("Mentor removed", "success");
+          await loadMentorsUI();
+        } catch (e) {
+          Notification.show(e.message || "Failed to remove mentor", "error");
+        }
+      }
+
+      document
+        .getElementById("createMentorForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          try {
+            const mentor = {
+              id: document.getElementById("mentorId").value.trim(),
+              name: document.getElementById("mentorNameInput").value.trim(),
+              department: document.getElementById("mentorDept").value,
+              password: document.getElementById("mentorPassword").value,
+            };
+            await Auth.adminCreateMentor(mentor);
+            Notification.show("Mentor created successfully", "success");
+            e.target.reset();
+            await loadMentorsUI();
+          } catch (err) {
+            Notification.show(
+              err.message || "Failed to create mentor",
+              "error",
+            );
+          }
+        });
+
+      function populateStudentsTable(students) {
+        const tbody = document.getElementById("studentsTableBody");
+        tbody.innerHTML = "";
+
+        students.forEach((student) => {
+          const semesters = student.academicRecords
+            ? student.academicRecords.length
+            : 0;
+          const credits = student.academicRecords
+            ? student.academicRecords.reduce(
+                (sum, sem) =>
+                  sum + sem.subjects.reduce((s, sub) => s + sub.credits, 0),
+                0,
+              )
+            : 0;
+
+          // Calculate performance trend
+          let trend = "N/A";
+          let trendClass = "status-badge status-pending";
+          if (student.academicRecords && student.academicRecords.length >= 2) {
+            const first = student.academicRecords[0].sgpa;
+            const last =
+              student.academicRecords[student.academicRecords.length - 1].sgpa;
+            if (last > first) {
+              trend = "📈 Improving";
+              trendClass = "status-badge status-completed";
+            } else if (last < first) {
+              trend = "📉 Declining";
+              trendClass = "status-badge status-pending";
+            } else {
+              trend = "➡️ Stable";
+              trendClass = "status-badge status-progress";
+            }
+          }
+
+          const row = document.createElement("tr");
+          row.innerHTML = `
+                    <td class="font-mono text-sm">${student.rollNo}</td>
+                    <td class="font-medium">${student.name}</td>
+                    <td>${student.department}</td>
+                    <td>${student.year}</td>
+                    <td class="font-bold text-primary">${student.cgpa}</td>
+                    <td class="text-sm">${student.mentor}</td>
+                    <td class="text-center">${semesters}</td>
+                    <td class="text-center">${credits}</td>
+                    <td><span class="${trendClass}">${trend}</span></td>
+                    <td>
+                        <button onclick='viewStudentDetail("${student.rollNo}")' class="table-action-btn primary">
+                            View Details
+                        </button>
+                    </td>
+                `;
+          tbody.appendChild(row);
+        });
+
+        document.getElementById("showingCount").textContent = students.length;
+        document.getElementById("totalCount").textContent =
+          allStudentsData.length;
+      }
+
+      function filterStudents() {
+        const searchTerm = document
+          .getElementById("searchInput")
+          .value.toLowerCase();
+        const deptFilter = document.getElementById("deptFilter").value;
+        const yearFilter = document.getElementById("yearFilter").value;
+        const cgpaFilter = document.getElementById("cgpaFilter").value;
+
+        let filtered = allStudentsData.filter((student) => {
+          // Search filter
+          const matchesSearch =
+            !searchTerm ||
+            student.name.toLowerCase().includes(searchTerm) ||
+            student.rollNo.toLowerCase().includes(searchTerm);
+
+          // Department filter
+          const matchesDept = !deptFilter || student.department === deptFilter;
+
+          // Year filter
+          const matchesYear =
+            !yearFilter || student.year.startsWith(yearFilter);
+
+          // CGPA filter
+          let matchesCGPA = true;
+          if (cgpaFilter) {
+            const [min, max] = cgpaFilter.split("-").map(Number);
+            matchesCGPA = student.cgpa >= min && student.cgpa <= max;
+          }
+
+          return matchesSearch && matchesDept && matchesYear && matchesCGPA;
+        });
+
+        populateStudentsTable(filtered);
+      }
+
+      function populateDepartmentStats(students) {
+        const container = document.getElementById("departmentStats");
+        if (!container) return;
+        if (!students.length) {
+          container.innerHTML =
+            '<div class="text-sm text-gray-500">No student data available yet.</div>';
+          return;
+        }
+        const deptData = {};
+
+        students.forEach((s) => {
+          if (!deptData[s.department]) {
+            deptData[s.department] = { count: 0, totalCGPA: 0, students: [] };
+          }
+          deptData[s.department].count++;
+          deptData[s.department].totalCGPA += s.cgpa;
+          deptData[s.department].students.push(s);
+        });
+
+        let html = "";
+        Object.keys(deptData)
+          .sort((a, b) => {
+            const avgA = deptData[a].totalCGPA / deptData[a].count;
+            const avgB = deptData[b].totalCGPA / deptData[b].count;
+            return avgB - avgA;
+          })
+          .forEach((dept) => {
+            const data = deptData[dept];
+            const avgCGPA = (data.totalCGPA / data.count).toFixed(2);
+            html += `
+                    <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="font-bold text-navy">${dept}</div>
+                            <div class="text-2xl font-bold text-primary">${avgCGPA}</div>
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            ${data.count} students
+                        </div>
+                    </div>
+                `;
+          });
+        container.innerHTML = html;
+      }
+
+      function populateYearStats(students) {
+        const container = document.getElementById("yearStats");
+        if (!container) return;
+        if (!students.length) {
+          container.innerHTML =
+            '<div class="text-sm text-gray-500">No student data available yet.</div>';
+          return;
+        }
+        const yearData = {};
+
+        students.forEach((s) => {
+          const year = s.year.split(" ")[0]; // Get "I", "II", etc.
+          if (!yearData[year]) {
+            yearData[year] = { count: 0, totalCGPA: 0 };
+          }
+          yearData[year].count++;
+          yearData[year].totalCGPA += s.cgpa;
+        });
+
+        const yearOrder = ["I", "II", "III", "IV"];
+        let html = "";
+        yearOrder.forEach((year) => {
+          if (yearData[year]) {
+            const data = yearData[year];
+            const avgCGPA = (data.totalCGPA / data.count).toFixed(2);
+            html += `
+                        <div class="bg-purple-50 p-4 rounded-lg text-center">
+                            <div class="text-sm text-gray-600 mb-1">${year} B.Tech</div>
+                            <div class="text-2xl font-bold text-primary">${avgCGPA}</div>
+                            <div class="text-xs text-gray-600 mt-1">${data.count} students</div>
+                        </div>
+                    `;
+          }
+        });
+        container.innerHTML =
+          html ||
+          '<div class="col-span-4 text-center text-gray-500">No year data available</div>';
+      }
+
+      function viewStudentDetail(rollNo) {
+        const student = allStudentsData.find((s) => s.rollNo === rollNo);
+        if (!student) return;
+
+        // Populate basic info
+        document.getElementById("detailName").textContent = student.name;
+        document.getElementById("detailRoll").textContent = student.rollNo;
+        document.getElementById("detailDept").textContent = student.department;
+        document.getElementById("detailYear").textContent = student.year;
+        document.getElementById("detailCGPA").textContent = student.cgpa;
+        document.getElementById("detailMentor").textContent = student.mentor;
+
+        if (student.academicRecords && student.academicRecords.length > 0) {
+          const records = student.academicRecords;
+
+          // Calculate metrics
+          const totalCredits = records.reduce(
+            (sum, sem) =>
+              sum + sem.subjects.reduce((s, sub) => s + sub.credits, 0),
+            0,
+          );
+          const allMarks = records.flatMap((sem) =>
+            sem.subjects.map((sub) => sub.marks),
+          );
+          const avgMarks = (
+            allMarks.reduce((a, b) => a + b, 0) / allMarks.length
+          ).toFixed(1);
+          const trend =
+            records.length >= 2 &&
+            records[records.length - 1].sgpa > records[0].sgpa
+              ? "📈 Improving"
+              : records.length >= 2 &&
+                  records[records.length - 1].sgpa < records[0].sgpa
+                ? "📉 Declining"
+                : "➡️ Stable";
+
+          document.getElementById("detailCredits").textContent = totalCredits;
+          document.getElementById("detailAvgMarks").textContent =
+            avgMarks + "%";
+          document.getElementById("detailSemesters").textContent =
+            records.length;
+          document.getElementById("detailTrend").textContent = trend;
+
+          // Render SGPA chart
+          renderStudentSGPAChart(records);
+
+          // Render academic records
+          renderStudentAcademicRecords(records);
+        } else {
+          document.getElementById("detailCredits").textContent = "0";
+          document.getElementById("detailAvgMarks").textContent = "N/A";
+          document.getElementById("detailSemesters").textContent = "0";
+          document.getElementById("detailTrend").textContent = "N/A";
+          document.getElementById("detailAcademicRecords").innerHTML = `
+                    <div class="text-center py-8 bg-gray-50 rounded-lg">
+                        <div class="text-4xl mb-2">📚</div>
+                        <p class="text-gray-600">No academic records available for this student.</p>
+                    </div>
+                `;
+        }
+
+        // Show detail view
+        document.getElementById("studentDetailView").style.display = "block";
+        document
+          .getElementById("studentDetailView")
+          .scrollIntoView({ behavior: "smooth" });
+
+        // Add/refresh mentor assignment UI inside detail view header area
+        injectAssignMentorUI(student);
+      }
+
+      async function injectAssignMentorUI(student) {
+        // Create dropdown once
+        const headerBox = document.querySelector(
+          "#studentDetailView .bg-gradient-to-r",
+        );
+        if (!headerBox) return;
+
+        let wrap = document.getElementById("assignMentorWrap");
+        if (!wrap) {
+          wrap = document.createElement("div");
+          wrap.id = "assignMentorWrap";
+          wrap.className = "mt-4";
+          wrap.innerHTML = `
+                    <div class="bg-white p-4 rounded-lg border border-gray-200">
+                        <div class="flex flex-col md:flex-row md:items-end gap-3">
+                            <div class="flex-1">
+                                <label class="form-label">Assign Mentor (Admin)</label>
+                                <select id="assignMentorSelect" class="form-input"></select>
+                            </div>
+                            <button class="btn" id="assignMentorBtn" type="button">Assign</button>
+                        </div>
+                        <div class="text-xs text-gray-600 mt-2">This updates the student’s mentor in the backend.</div>
+                    </div>
+                `;
+          headerBox.appendChild(wrap);
+        }
+
+        try {
+          cachedMentors = cachedMentors.length
+            ? cachedMentors
+            : await Auth.adminGetMentors();
+          const sel = document.getElementById("assignMentorSelect");
+          sel.innerHTML =
+            `<option value="">Select mentor</option>` +
+            cachedMentors
+              .map(
+                (m) =>
+                  `<option value="${m.id}">${m.name} (${m.department || "-"})</option>`,
+              )
+              .join("");
+          document.getElementById("assignMentorBtn").onclick = async () => {
+            const mentorId = sel.value;
+            if (!mentorId)
+              return Notification.show("Please select a mentor", "error");
+            try {
+              await Auth.adminAssignMentor(student.rollNo, mentorId);
+              Notification.show("Mentor assigned successfully", "success");
+              // Update local UI state immediately
+              const chosen = cachedMentors.find((m) => m.id === mentorId);
+              if (chosen) student.mentor = chosen.name;
+              document.getElementById("detailMentor").textContent =
+                student.mentor;
+              populateMentorStats(allStudentsData);
+              populateStudentsTable(allStudentsData);
+            } catch (e) {
+              Notification.show(
+                e.message || "Failed to assign mentor",
+                "error",
+              );
+            }
+          };
+        } catch (e) {
+          Notification.show(
+            e.message || "Failed to load mentors list",
+            "error",
+          );
+        }
+      }
+
+      function renderStudentSGPAChart(records) {
+        if (currentDetailChart) {
+          currentDetailChart.destroy();
+        }
+
+        const ctx = document
+          .getElementById("adminStudentSGPAChart")
+          .getContext("2d");
+        const labels = records.map((r) => `Sem ${r.semester}`);
+        const data = records.map((r) => r.sgpa);
+
+        currentDetailChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "SGPA",
+                data: data,
+                borderColor: "#2563eb",
+                backgroundColor: "rgba(37, 99, 235, 0.1)",
+                tension: 0.4,
+                fill: true,
+                borderWidth: 3,
+                pointRadius: 6,
+                pointBackgroundColor: "#2563eb",
+                pointBorderColor: "#fff",
+                pointBorderWidth: 2,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+            },
+            scales: {
+              y: {
+                beginAtZero: false,
+                min: 0,
+                max: 10,
+                ticks: {
+                  color: "#4b5563",
+                  font: { family: "Inter", weight: "500" },
+                },
+                grid: { color: "rgba(229, 231, 235, 1)" },
+              },
+              x: {
+                ticks: {
+                  color: "#4b5563",
+                  font: { family: "Inter", weight: "500" },
+                },
+                grid: { display: false },
+              },
+            },
+          },
+        });
+      }
+
+      function renderStudentAcademicRecords(records) {
+        const container = document.getElementById("detailAcademicRecords");
+        container.innerHTML =
+          '<h4 class="font-semibold text-gray-800 mb-4">📖 Complete Semester-wise Records</h4>';
+
+        records.forEach((semester) => {
+          const totalCredits = semester.subjects.reduce(
+            (sum, sub) => sum + sub.credits,
+            0,
+          );
+          const totalPoints = semester.subjects.reduce(
+            (sum, sub) => sum + sub.credits * sub.points,
+            0,
+          );
+          const avgMarks = (
+            semester.subjects.reduce((sum, sub) => sum + sub.marks, 0) /
+            semester.subjects.length
+          ).toFixed(1);
+
+          const semDiv = document.createElement("div");
+          semDiv.className = "bg-gray-50 p-4 rounded-lg mb-4";
+          semDiv.innerHTML = `
+                    <div class="flex justify-between items-center mb-3">
+                        <h5 class="font-semibold text-navy">Semester ${semester.semester}</h5>
+                        <div class="flex gap-6 text-sm">
+                            <div><span class="text-gray-600">SGPA:</span> <span class="font-bold text-primary text-lg">${semester.sgpa}</span></div>
+                            <div><span class="text-gray-600">Credits:</span> <span class="font-semibold">${totalCredits}</span></div>
+                            <div><span class="text-gray-600">Avg:</span> <span class="font-semibold">${avgMarks}%</span></div>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="table-clean w-full text-sm">
+                            <thead>
+                                <tr>
+                                    <th>Subject Code</th>
+                                    <th>Subject Name</th>
+                                    <th>Grade</th>
+                                    <th>Credits</th>
+                                    <th>Obtained Credits</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${semester.subjects
+                                  .map((sub) => {
+                                    const obtainedCredits =
+                                      sub.grade !== "F" && sub.grade !== "Ab"
+                                        ? sub.credits
+                                        : 0;
+                                    return `
+                                    <tr>
+                                        <td class="font-mono text-xs">${sub.code}</td>
+                                        <td>${sub.name}</td>
+                                        <td class="text-center">
+                                            <span class="status-badge ${getGradeClass(sub.grade)}">${sub.grade}</span>
+                                        </td>
+                                        <td class="text-center">${sub.credits}</td>
+                                        <td class="text-center font-semibold ${obtainedCredits > 0 ? "text-green-600" : "text-red-600"}">${obtainedCredits}</td>
+                                    </tr>
+                                `;
+                                  })
+                                  .join("")}
+                            </tbody>
+                            <tfoot>
+                                <tr class="bg-white font-semibold">
+                                    <td colspan="3" class="text-right">Total</td>
+                                    <td class="text-center">${totalCredits}</td>
+                                    <td class="text-center text-primary">${semester.subjects.reduce((sum, sub) => sum + (sub.grade !== "F" && sub.grade !== "Ab" ? sub.credits : 0), 0)}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                `;
+          container.appendChild(semDiv);
+        });
+      }
+
+      function closeStudentDetail() {
+        document.getElementById("studentDetailView").style.display = "none";
+        if (currentDetailChart) {
+          currentDetailChart.destroy();
+          currentDetailChart = null;
+        }
+      }
+
+      // function populateSemesterSummary(students) {
+      //   const container = document.getElementById("semesterSummary");
+      //   const semesterData = {};
+
+      //   students.forEach((student) => {
+      //     if (student.academicRecords) {
+      //       student.academicRecords.forEach((sem) => {
+      //         if (!semesterData[sem.semester]) {
+      //           semesterData[sem.semester] = { sgpas: [], totalStudents: 0 };
+      //         }
+      //         semesterData[sem.semester].sgpas.push(sem.sgpa);
+      //         semesterData[sem.semester].totalStudents++;
+      //       });
+      //     }
+      //   });
+
+      //   let html = '<div class="grid grid-cols-1 md:grid-cols-3 gap-4">';
+      //   Object.keys(semesterData)
+      //     .sort((a, b) => a - b)
+      //     .forEach((sem) => {
+      //       const data = semesterData[sem];
+      //       const avgSGPA = (
+      //         data.sgpas.reduce((a, b) => a + b, 0) / data.sgpas.length
+      //       ).toFixed(2);
+      //       html += `
+      //               <div class="bg-blue-50 p-4 rounded-lg">
+      //                   <div class="text-sm text-gray-600 mb-1">Semester ${sem}</div>
+      //                   <div class="text-2xl font-bold text-primary">${avgSGPA}</div>
+      //                   <div class="text-xs text-gray-600 mt-1">${data.totalStudents} students</div>
+      //               </div>
+      //           `;
+      //     });
+      //   html += "</div>";
+      //   container.innerHTML = html;
+      // }
+
+      function populatePerformers(students) {
+        const sorted = [...students].sort((a, b) => b.cgpa - a.cgpa);
+        const topPerformers = sorted.slice(0, 3);
+
+        // Students needing support = anyone with at least one backlog,
+        // ranked by how many backlogs they're carrying (highest first).
+        const needSupport = students
+          .map((s) => ({ student: s, backlogs: getBacklogCount(s) }))
+          .filter((entry) => entry.backlogs > 0)
+          .sort((a, b) => b.backlogs - a.backlogs);
+
+        document.getElementById("topPerformers").innerHTML = topPerformers
+          .map(
+            (s) => `
+                <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="font-semibold text-gray-800">${s.name}</div>
+                            <div class="text-xs text-gray-600 font-mono">${s.rollNo}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-bold text-green-700">${s.cgpa}</div>
+                            <div class="text-xs text-gray-600">${s.department}</div>
+                        </div>
+                    </div>
+                </div>
+            `,
+          )
+          .join("");
+
+        const needSupportContainer = document.getElementById("needSupport");
+        needSupportContainer.innerHTML = needSupport.length
+          ? needSupport
+              .map(
+                ({ student: s, backlogs }) => `
+                <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-500">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="font-semibold text-gray-800">${s.name}</div>
+                            <div class="text-xs text-gray-600 font-mono">${s.rollNo}</div>
+                            <div class="text-xs text-gray-600">${s.department} · ${s.year}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-bold text-red-600">${backlogs}</div>
+                            <div class="text-xs text-gray-600">${backlogs === 1 ? "backlog" : "backlogs"}</div>
+                        </div>
+                    </div>
+                </div>
+            `,
+              )
+              .join("")
+          : '<div class="text-sm text-gray-500 text-center">No students currently have backlogs 🎉</div>';
+      }
+
+      function populateMentorStats(students) {
+        const container = document.getElementById("mentorStats");
+        const mentorData = {};
+
+        students.forEach((s) => {
+          if (!mentorData[s.mentor]) {
+            mentorData[s.mentor] = {
+              count: 0,
+              totalCGPA: 0,
+              students: [],
+              dept: s.department,
+              passed: 0,
+              withBacklogs: 0,
+            };
+          }
+          mentorData[s.mentor].count++;
+          mentorData[s.mentor].totalCGPA += s.cgpa;
+          mentorData[s.mentor].students.push(s);
+
+          if (getBacklogCount(s) > 0) {
+            mentorData[s.mentor].withBacklogs++;
+          } else {
+            mentorData[s.mentor].passed++;
+          }
+        });
+
+        let html =
+          '<div class="overflow-x-auto"><table class="table-clean w-full"><thead><tr><th>Mentor Name</th><th>Department</th><th>Total Students</th><th>Avg CGPA</th><th>Top Student</th><th>Passed</th><th>Backlogs</th><th>Performance</th></tr></thead><tbody>';
+
+        Object.keys(mentorData)
+          .sort()
+          .forEach((mentor) => {
+            const data = mentorData[mentor];
+            const avgCGPA = (data.totalCGPA / data.count).toFixed(2);
+            const topStudent = data.students.sort((a, b) => b.cgpa - a.cgpa)[0];
+            const performanceClass =
+              avgCGPA >= 8.5
+                ? "status-badge status-completed"
+                : avgCGPA >= 7.5
+                  ? "status-badge status-progress"
+                  : "status-badge status-pending";
+            const performanceText =
+              avgCGPA >= 8.5
+                ? "Excellent"
+                : avgCGPA >= 7.5
+                  ? "Good"
+                  : "Needs Focus";
+
+            html += `
+                    <tr>
+                        <td class="font-medium">${mentor}</td>
+                        <td>${data.dept}</td>
+                        <td class="text-center font-semibold">${data.count}</td>
+                        <td class="text-center font-bold text-primary">${avgCGPA}</td>
+                        <td class="text-sm">${topStudent.name} (${topStudent.cgpa})</td>
+                        <td class="text-center font-semibold text-green-600">${data.passed}</td>
+                        <td class="text-center font-semibold ${data.withBacklogs > 0 ? "text-red-600" : "text-gray-500"}">${data.withBacklogs}</td>
+                        <td><span class="${performanceClass}">${performanceText}</span></td>
+                    </tr>
+                `;
+          });
+
+        html += "</tbody></table></div>";
+        container.innerHTML = html;
+      }
+
+      function getGradeClass(grade) {
+        if (grade === "A+" || grade === "A") return "status-completed";
+        if (grade === "B") return "status-progress";
+        if (grade === "C" || grade === "D" || grade === "E")
+          return "status-pending";
+        if (grade === "F" || grade === "Ab")
+          return "bg-red-100 text-red-700 border-red-300";
+        return "status-pending";
+      }
+
+      // Counts a student's outstanding backlogs: subjects graded F or Ab
+      // (absent) across all recorded semesters — same definition used
+      // elsewhere in the dashboard for "obtained credits".
+      function getBacklogCount(student) {
+        if (!student.academicRecords) return 0;
+        let count = 0;
+        student.academicRecords.forEach((sem) => {
+          (sem.subjects || []).forEach((sub) => {
+            if (sub.grade === "F" || sub.grade === "Ab") count++;
+          });
+        });
+        return count;
+      }
+
+      // Load toppers data — top 3 students per academic year and per department
+      function loadToppers() {
+        const students = allStudentsData || [];
+
+        const yearContainer = document.getElementById("yearWiseToppers");
+        const deptContainer = document.getElementById("deptWiseToppers");
+
+        if (!yearContainer || !deptContainer) {
+          console.error("Topper containers not found");
+          return;
+        }
+
+        yearContainer.innerHTML = "";
+        deptContainer.innerHTML = "";
+
+        if (students.length === 0) {
+          yearContainer.innerHTML =
+            '<div class="text-gray-500 text-center">No student data available</div>';
+
+          deptContainer.innerHTML =
+            '<div class="text-gray-500 text-center">No student data available</div>';
+
+          return;
+        }
+
+        const rankMedal = ["🥇", "🥈", "🥉"];
+
+        function renderTopperGroup(groupLabel, groupStudents, colorClasses) {
+          const top3 = [...groupStudents]
+            .sort((a, b) => Number(b.cgpa) - Number(a.cgpa))
+            .slice(0, 3);
+
+          return `
+                <div class="${colorClasses} p-4 rounded-lg mb-3">
+                    <div class="font-bold text-navy mb-2">${groupLabel}</div>
+                    ${top3
+                      .map(
+                        (s, i) => `
+                        <div class="flex justify-between items-center ${i > 0 ? "mt-2 pt-2 border-t border-white/60" : ""}">
+                            <div>
+                                <div class="text-sm font-medium">${rankMedal[i] || `${i + 1}.`} ${s.name}</div>
+                                <div class="text-xs text-gray-600 font-mono">${s.rollNo}</div>
+                            </div>
+                            <div class="font-bold text-primary">${Number(s.cgpa).toFixed(2)}</div>
+                        </div>
+                    `,
+                      )
+                      .join("")}
+                </div>
+            `;
+        }
+
+        // ==========================
+        // YEAR WISE TOPPERS (top 3 per year, in academic order)
+        // ==========================
+
+        const yearGroups = {};
+        students.forEach((student) => {
+          const year = student.year || "Unknown";
+          if (!yearGroups[year]) yearGroups[year] = [];
+          yearGroups[year].push(student);
+        });
+
+        const yearOrder = ["I", "II", "III", "IV"];
+        const orderedYears = Object.keys(yearGroups).sort((a, b) => {
+          const ai = yearOrder.findIndex((y) => a.startsWith(y));
+          const bi = yearOrder.findIndex((y) => b.startsWith(y));
+          if (ai === -1 && bi === -1) return a.localeCompare(b);
+          if (ai === -1) return 1;
+          if (bi === -1) return -1;
+          return ai - bi;
+        });
+
+        orderedYears.forEach((year) => {
+          yearContainer.innerHTML += renderTopperGroup(
+            year,
+            yearGroups[year],
+            "bg-blue-50",
+          );
+        });
+
+        // ==========================
+        // DEPARTMENT TOPPERS (top 3 per department)
+        // ==========================
+
+        const deptGroups = {};
+        students.forEach((student) => {
+          const dept = student.department || "Unknown";
+          if (!deptGroups[dept]) deptGroups[dept] = [];
+          deptGroups[dept].push(student);
+        });
+
+        Object.keys(deptGroups)
+          .sort()
+          .forEach((dept) => {
+            deptContainer.innerHTML += renderTopperGroup(
+              dept,
+              deptGroups[dept],
+              "bg-green-50",
+            );
+          });
+      }
+      // Export the full Students Overview as a excel sheet
+      function exportAllData() {
+  const students = allStudentsData || [];
+
+  if (!students.length) {
+    if (window.Notification && Notification.show) {
+      Notification.show("No student data available to export", "error");
+    } else {
+      alert("No student data available to export");
+    }
+    return;
+  }
+
+  if (typeof XLSX === 'undefined') {
+    if (window.Notification && Notification.show) {
+      Notification.show("Excel export library failed to load. Check your internet connection.", "error");
+    } else {
+      alert("Excel export library failed to load.");
+    }
+    return;
+  }
+
+  if (window.Notification && Notification.show) {
+    Notification.show("Preparing Excel export...", "info");
+  }
+
+  try {
+    const dataRows = students.map((student) => {
+      const semesters = student.academicRecords ? student.academicRecords.length : 0;
+      const credits = student.academicRecords
+        ? student.academicRecords.reduce(
+            (sum, sem) => sum + (sem.subjects || []).reduce((s, sub) => s + (sub.credits || 0), 0),
+            0
+          )
+        : 0;
+      const backlogs = getBacklogCount(student);
+
+      return {
+        "Roll No": student.rollNo || "-",
+        "Name": student.name || "-",
+        "Department": student.department || "-",
+        "Year": student.year || "-",
+        "CGPA": student.cgpa != null && !isNaN(student.cgpa) ? Number(student.cgpa).toFixed(2) : "-",
+        "Mentor": student.mentor || "Unassigned",
+        "Semesters": semesters,
+        "Credits": credits,
+        "Backlogs": backlogs > 0 ? backlogs : "None",
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(dataRows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Students Overview");
+
+    XLSX.writeFile(workbook, `all_students_overview_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    
+    if (window.Notification && Notification.show) {
+      Notification.show("Student data exported as Excel (.xlsx) successfully!", "success");
+    }
+  } catch (err) {
+    console.error("Excel export failed:", err);
+    if (window.Notification && Notification.show) {
+      Notification.show("Failed to generate Excel export", "error");
+    } else {
+      alert("Failed to generate Excel export.");
+    }
+  }
+}
+      async function loadRegulations() {
+        try {
+          const res = await fetch("/api/admin/regulations", {
+            headers: { Authorization: `Bearer ${Auth.getToken()}` },
+          });
+          const data = await res.json();
+          const regulations = data.regulations || [];
+
+          const container = document.getElementById("regulationsList");
+          if (regulations.length === 0) {
+            container.innerHTML =
+              '<div class="text-center text-gray-500">No regulations found</div>';
+            return;
+          }
+
+          container.innerHTML = regulations
+            .map(
+              (reg) => `
+                    <div class="bg-white p-4 rounded-lg border border-gray-200">
+                        <!-- Changed to items-center and added gap-3 -->
+                        <div class="flex justify-between items-center gap-3">
+                            
+                            <!-- flex-1 min-w-0 forces this container to fill space but prevents pushing buttons off screen -->
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-semibold text-navy truncate" title="${reg.name}">${reg.name}</h4>
+                                <p class="text-sm text-gray-600 truncate" title="${reg.description || ''}">${reg.description || "No description"}</p>
+                                <p class="text-xs text-gray-500 mt-1">ID: ${reg.id}</p>
+                            </div>
+                            
+                            <!-- flex-shrink-0 protects the buttons from being squished -->
+                            <div class="flex gap-2 flex-shrink-0">
+                                <button onclick="editRegulation('${reg.id}')" class="btn-secondary text-xs px-3 py-1.5">Edit</button>
+                                <button onclick="deleteRegulation('${reg.id}')" class="btn-danger text-xs px-3 py-1.5">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                `
+            )
+            .join("");
+        } catch (error) {
+          console.error("Error loading regulations:", error);
+          document.getElementById("regulationsList").innerHTML =
+            '<div class="text-center text-red-500">Error loading regulations</div>';
+        }
+      }
+
+      // Regulation management functions
+      document
+        .getElementById("createRegulationForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault();
+
+          try {
+            // Grab form directly to prevent 'this' context errors
+            const form = document.getElementById("createRegulationForm");
+            const id = document.getElementById("regulationId").value.trim();
+            const name = document.getElementById("regulationName").value.trim();
+            const description = document.getElementById("regulationDesc").value.trim();
+
+            if (!id || !name) {
+              Notification.show("Please fill in all required fields", "error");
+              return;
+            }
+
+            // Safely get token
+            let token = Auth.getToken();
+            if (!token) throw new Error("No authentication token found.");
+
+            let res;
+
+            // --- EDIT MODE ---
+            if (typeof editingRegulationId !== 'undefined' && editingRegulationId) {
+              res = await fetch(
+                `/api/admin/regulations/${encodeURIComponent(editingRegulationId)}`,
+                {
+                  method: "PUT",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                  },
+                  body: JSON.stringify({ name, description }),
+                }
+              );
+
+              if (res.ok) {
+                Notification.show("Regulation updated successfully", "success");
+                cancelRegulationEdit();
+                await loadRegulations();
+              } else {
+                const errorData = await res.json().catch(() => ({}));
+                Notification.show(errorData.error || "Failed to update regulation", "error");
+              }
+              return;
+            }
+
+            // --- CREATE MODE ---
+            res = await fetch("/api/admin/regulations", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+              },
+              body: JSON.stringify({ id, name, description }),
+            });
+
+            if (res.ok) {
+              Notification.show("Regulation created successfully", "success");
+              form.reset(); // Safely reset form
+              await loadRegulations();
+            } else {
+              const errorData = await res.json().catch(() => ({}));
+              Notification.show(errorData.error || "Failed to create regulation", "error");
+            }
+
+          } catch (error) {
+            // THIS TELLS US EXACTLY WHAT IS BREAKING!
+            console.error("Regulation operation error:", error);
+            alert("Crash Detected!\nError message: " + error.message);
+          } 
+        });
+
+
+      async function editRegulation(id) {
+  try {
+    const res = await fetch("/api/admin/regulations", {
+      headers: {
+        Authorization: `Bearer ${Auth.getToken()}`,
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to load regulations");
+    }
+
+    const data = await res.json();
+    const regulations = data.regulations || [];
+
+    const regulation = regulations.find(
+      (reg) => String(reg.id) === String(id)
+    );
+
+    if (!regulation) {
+      Notification.show("Regulation not found", "error");
+      return;
+    }
+
+    // Store the ID currently being edited
+    editingRegulationId = regulation.id;
+
+    // Fill the form
+    document.getElementById("regulationId").value = regulation.id;
+    document.getElementById("regulationName").value =
+      regulation.name || "";
+    document.getElementById("regulationDesc").value =
+      regulation.description || "";
+
+    // ID should not be changed while editing
+    document.getElementById("regulationId").readOnly = true;
+
+    // Change button to Update
+    document.getElementById("regulationSubmitBtn").textContent =
+      "Update Regulation";
+
+    // Show Cancel button
+    document
+      .getElementById("cancelRegulationEditBtn")
+      .classList.remove("hidden");
+
+    // Scroll to the form
+    document
+      .getElementById("createRegulationForm")
+      .scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+  } catch (error) {
+    console.error("Error editing regulation:", error);
+    Notification.show("Failed to load regulation", "error");
+  }
+}
+function cancelRegulationEdit() {
+  editingRegulationId = null;
+
+  const form = document.getElementById("createRegulationForm");
+
+  form.reset();
+
+  document.getElementById("regulationId").readOnly = false;
+
+  document.getElementById("regulationSubmitBtn").textContent =
+    "Create Regulation";
+
+  document
+    .getElementById("cancelRegulationEditBtn")
+    .classList.add("hidden");
+}
+
+      async function deleteRegulation(id) {
+        if (!confirm("Are you sure you want to delete this regulation? This may affect associated branches and subjects.")) {
+          return;
+        }
+
+        try {
+          // Added encodeURIComponent here as well
+          const res = await fetch(`/api/admin/regulations/${encodeURIComponent(id)}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${Auth.getToken()}` },
+          });
+
+          if (res.ok) {
+            Notification.show("Regulation deleted successfully", "success");
+            loadRegulations();
+          } else {
+            const error = await res.json().catch(() => ({}));
+            Notification.show(error.error || "Failed to delete regulation", "error");
+          }
+        } catch (error) {
+          Notification.show("Network error", "error");
+        }
+      }
+
+      // // Call loadToppers and loadRegulations in loadAdminData
+      // const originalLoadAdminData = loadAdminData;
+      // loadAdminData = async function () {
+      //   await originalLoadAdminData();
+      //   safeRun("year/department toppers", loadToppers);
+      //   safeRun("regulations list", loadRegulations);
+      // };
+    </script>
+  
+<!-- Scroll to Top Button -->
+    <button id="scrollTopBtn" onclick="scrollToTop()" class="scroll-top-btn" title="Go to top">↑
+
+    </button></body>
+</html>

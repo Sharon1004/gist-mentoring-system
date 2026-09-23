@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Login - GIST Mentoring System</title>
+    <link rel="icon" type="image/svg+xml" href="assets/gist-logo.svg">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <img src="assets/gist-logo.svg" alt="GIST Nellore" class="login-logo">
+                <h1 class="login-title">Student Login</h1>
+                <p class="login-subtitle">GIST Mentoring & Career Tracking System</p>
+            </div>
+
+            <form id="studentLoginForm" class="login-form">
+                <div class="form-group">
+                    <label class="form-label">Roll Number</label>
+                    <input type="text" name="rollNumber" class="form-input" required placeholder="222U1A0522" autofocus>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" class="form-input" required placeholder="Enter your password">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-checkbox">
+                        <input type="checkbox" name="remember">
+                        <span>Remember me</span>
+                    </label>
+                    <a href="#" onclick="Notification.show('Please contact admin@gist.ac.in for password reset', 'info'); return false;" class="forgot-password">Forgot Password?</a>
+                </div>
+
+                <button type="submit" class="btn btn-login">Login</button>
+            </form>
+
+            <div class="login-footer">
+                <div style="margin-bottom: 12px;">
+                    <a href="student-registration.html" class="btn-secondary" style="width: 100%; justify-content: center;">
+                        📝 Register as Student
+                    </a>
+                </div>
+                <a href="index.html" class="back-link">← Back to Home</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        document.getElementById('studentLoginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const rollNo = this.rollNumber.value.trim();
+            const password = this.password.value;
+            
+            // Clear previous errors
+            document.querySelectorAll('.error-message').forEach(el => el.remove());
+            
+            // Validate inputs
+            if (!rollNo) {
+                Validator.showError(this.rollNumber, 'Roll number is required');
+                return;
+            }
+            
+            if (!password) {
+                Validator.showError(this.password, 'Password is required');
+                return;
+            }
+            
+            // Show loading
+            Utils.showLoading();
+
+            const credentials = { username: rollNo, password: password };
+            const ok = await Auth.login(credentials, 'student');
+
+            Utils.hideLoading();
+            if (ok) {
+                Notification.show('Login successful! Welcome back.', 'success');
+                setTimeout(() => {
+                    window.location.href = 'student-dashboard.html';
+                }, 300);
+            } else {
+                Notification.show('Invalid roll number or password.', 'error');
+            }
+        });
+
+        // Clear error on input
+        document.querySelectorAll('.form-input').forEach(input => {
+            input.addEventListener('input', function() {
+                Validator.clearError(this);
+            });
+        });
+    </script>
+</body>
+</html>

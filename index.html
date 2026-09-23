@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIST Mentoring & Career Tracking System</title>
+    <link rel="icon" type="image/svg+xml" href="assets/gist-logo.svg">
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar py-4">
+        <div class="container mx-auto px-6 flex items-center justify-between">
+            <div class="text-xl font-semibold flex items-center gap-3 navbar-brand">
+                <img src="assets/gist-logo.svg" alt="GIST Nellore" class="brand-logo">
+                <span>GIST Mentoring System</span>
+            </div>
+            <div class="hidden md:flex items-center gap-2 text-sm text-gray-600">
+                Geethanjali Institute of Science and Technology, Nellore
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="gradient-primary text-white py-20">
+        <div class="container mx-auto px-6 text-center">
+            <div class="max-w-4xl mx-auto">
+                <h1 class="h1 mb-6">GIST Mentoring System</h1>
+                <p class="text-xl mb-12 opacity-95">
+                    Career Development and Academic Tracking Platform for Geethanjali Institute of Science and Technology (GIST), Nellore
+                </p>
+                
+                <!-- Key Stats -->
+                <div class="grid grid-cols-3 gap-4 p-6 rounded-xl glass-stats">
+                    <div class="text-center"><div class="text-3xl font-bold mb-1" id="landingStudents">0</div><div class="text-sm opacity-90">Students</div></div>
+                    <div class="text-center"><div class="text-3xl font-bold mb-1" id="landingMentors">0</div><div class="text-sm opacity-90">Mentors</div></div>
+                    <div class="text-center"><div class="text-3xl font-bold mb-1" id="landingAvgCgpa">-</div><div class="text-sm opacity-90">Avg CGPA</div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard Selection -->
+    <section class="py-16">
+        <div class="container mx-auto px-6">
+            <h2 class="h2 text-center text-gist-navy mb-3">Choose Your Dashboard</h2>
+            <p class="text-base text-gray-600 text-center max-w-2xl mx-auto mb-12">Professional dashboards designed for students, mentors, and administrators</p>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                <!-- Student Card -->
+<a href="student-login.html" class="card dashboard-link-card p-8 text-center flex flex-col items-center justify-center">
+     
+                    <svg class="mb-4" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+    <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+</svg>
+                    <h3 class="text-xl font-semibold text-gist-navy mb-3">Student Login</h3>
+                    <p class="text-sm text-gray-600 mb-6">Track academic progress, goals, mentor feedback, career skills & certifications</p>
+                    <div class="flex items-center gap-2 text-primary font-medium text-sm">
+                        Login as Student <span>→</span>
+                    </div>
+                </a>
+
+<!-- Mentor Card -->
+<a href="mentor-login.html" class="card dashboard-link-card p-8 text-center flex flex-col items-center justify-center">
+    <svg class="mb-4" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+    <circle cx="9" cy="7" r="4"/>
+    <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+</svg>
+                    <h3 class="text-xl font-semibold text-gist-navy mb-3">Mentor Login</h3>
+                    <p class="text-sm text-gray-600 mb-6">Monitor student progress, assign goals, provide feedback & track performance</p>
+                    <div class="flex items-center gap-2 text-primary font-medium text-sm">
+                        Login as Mentor <span>→</span>
+                    </div>
+                </a>
+
+                <!-- Admin Card -->
+<a href="admin-login.html" class="card dashboard-link-card p-8 text-center flex flex-col items-center justify-center">
+    <svg class="mb-4" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+</svg>
+                    <h3 class="text-xl font-semibold text-gist-navy mb-3">Admin Login</h3>
+                    <p class="text-sm text-gray-600 mb-6">Institutional analytics, branch-wise performance, placement readiness overview</p>
+                    <div class="flex items-center gap-2 text-primary font-medium text-sm">
+                        Login as Admin <span>→</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Login Information -->
+    <section class="py-12 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-2xl font-semibold text-center mb-8 text-navy">Login Information</h2>
+                <div class="card p-6">
+                    <div class="text-sm text-gray-700 space-y-2">
+                        <p><strong>Students:</strong> Login using your roll number and password.</p>
+                        <p><strong>Mentors:</strong> Login using your mentor ID and password.</p>
+                        <p><strong>Admins:</strong> Login using your admin ID and password.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="gradient-primary text-white py-12">
+        <div class="container mx-auto px-6 text-center">
+            <div class="max-w-2xl mx-auto">
+                <img src="assets/gist-logo.svg" alt="GIST Nellore" class="footer-logo">
+                <h3 class="text-xl font-semibold mb-2">Geethanjali Institute of Science and Technology (GIST), Nellore</h3>
+                <p class="text-sm opacity-90 mb-4">Mentoring & Career Tracking System</p>
+                <p class="text-sm opacity-75">Empowering students from first year to placement readiness © 2026</p>
+            </div>
+        </div>
+    </footer>
+    <script>
+        async function loadLandingStats() {
+            try {
+                const res = await fetch(`${Auth.apiBase}/api/public/stats`);
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) return;
+
+                document.getElementById('landingStudents').textContent = data.totalStudents ?? 0;
+                document.getElementById('landingMentors').textContent = data.totalMentors ?? 0;
+                document.getElementById('landingAvgCgpa').textContent = data.avgCgpa ?? '-';
+            } catch (_error) {
+                // Keep defaults if the backend is unavailable.
+            }
+        }
+
+        loadLandingStats();
+    </script>
+</body>
+</html>
